@@ -7,6 +7,7 @@ from jose import jwt, JWTError
 import datetime
 import random
 from database import SessionLocal, engine, Base, User
+from list_resources import ListResources
 
 # JWT settings
 SECRET_KEY = "your_secret_key"
@@ -87,6 +88,8 @@ def protected_route(token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username = payload.get("sub")
-        return {"message": f"Welcome, {username}!"}
+        listReources = ListResources()
+        resource_groups  = listReources.list_resource_groups()
+        return {"message": f"Welcome, {username}!", "resource_groups": resource_groups}
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
