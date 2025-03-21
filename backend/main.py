@@ -112,13 +112,13 @@ def authorised(authorization):
 def protected_route(authorization: str = Header(...)):
     payload = authorised(authorization)
     username = payload.get("sub")
-    resource_groups  = [azureOps.listResources.list_resource_groups()[1]] # TODO: proper one
+    resource_groups  = [azureOps.resourceManagement.list_resource_groups()[1]] # TODO: proper one
     return {"message": f"Welcome, {username}!", "resource_groups": resource_groups}
 
 @app.post("/products/")
 def products(request_data: ProductRequest, authorization: str = Header(...)):
     payload = authorised(authorization)
-    blob_storage = azureOps.listResources.get_blobstorage_from_resource_group(request_data.rg_name)
+    blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(request_data.rg_name)
     if len(blob_storage) == 0:
         return
     
