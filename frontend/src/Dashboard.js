@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const Dashboard = ({ token }) => {
+const Dashboard = ({ token, setToken }) => {
   const [message, setMessage] = useState("");
   const [resourceGroups, setResourceGroups] = useState([]);
 
@@ -10,7 +10,11 @@ const Dashboard = ({ token }) => {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
-      .then((data) => setResourceGroups(data.resource_groups || []))
+      .then((data) => {
+        console.log("Fetched data:", data);
+        setResourceGroups(data.resource_groups || []);
+        setMessage(data.message);
+      })
       .catch(() => setMessage("Unauthorized"));
   }, [token]);
 
@@ -29,7 +33,8 @@ const Dashboard = ({ token }) => {
             <p>No resource groups found</p>
           )}
         </ul>
-      <button onClick={() => localStorage.removeItem("token")}>Logout</button>
+        <p>{message}</p>
+      <button onClick={() => setToken("")}>Logout</button>
     </div>
   );
 };

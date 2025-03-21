@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Header
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from passlib.context import CryptContext
@@ -84,8 +85,10 @@ def login(user_data: UserLogin, db: Session = Depends(get_db)):
     return {"access_token": access_token}
 
 @app.get("/protected/")
-def protected_route(token: str):
+def protected_route(authorization: str = Header(...)):
     try:
+        # Expecting header: "Bearer <token>"
+        token = authorization.split(" ")[1]
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username = payload.get("sub")
         listReources = ListResources()

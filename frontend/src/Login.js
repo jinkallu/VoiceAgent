@@ -15,7 +15,7 @@ const Login = ({ setToken }) => {
     const data = await response.json();
     if (response.ok) {
       setToken(data.access_token);
-      localStorage.setItem("token", data.access_token);
+      //localStorage.setItem("token", data.access_token);
       window.location.href = "/dashboard";
     } else {
       setError("Invalid username or password");

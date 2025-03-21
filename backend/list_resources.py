@@ -21,13 +21,12 @@ class ListResources:
     # List resource groups
     def list_resource_groups(self):
         print("List Resources")
-        resource_groups = self.client.resource_groups.list()
+        groups = self.client.resource_groups.list()
         resource_groups = []
-        for rg in resource_groups:
+        for rg in groups:
             print(f"Resource Group Name: {rg.name}, Location: {rg.location}")
             resource_groups.append({"name": rg.name, "location": rg.location})
 
-        self.client.close()  # Close the client properly
         return resource_groups
             
 
