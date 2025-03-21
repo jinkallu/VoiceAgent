@@ -138,7 +138,9 @@ def products(request_data: ProductRequest, authorization: str = Header(...)):
 @app.post("/product_data/")
 def product_data(request_data: ProductDataRequest, authorization: str = Header(...)):
     payload = authorised(authorization)
-    product_data = azureOps.blobOps.getStorageMappingAsJson(request_data.product_name)
+    product_data = azureOps.blobOps.getProductAsJson(request_data.product_name)
     print(product_data)
+    #print(azureOps.blobOps.createContainerIfNotExists("test"))
+    
 
     return {"product_data": product_data}

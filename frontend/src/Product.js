@@ -32,7 +32,7 @@ const Product = ({ token, index, product }) => {
             })
             .catch(() => setMessage("Unauthorized"));
 
-    }, product)
+    }, [product])
 
 
     return (

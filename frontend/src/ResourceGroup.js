@@ -33,7 +33,7 @@ const ResourceGroup = ({ token, resourceGroups }) => {
       })
       .catch(() => setMessage("Unauthorized"));
 
-  }, resourceGroups)
+  }, [resourceGroups])
 
   return (
     <div>
