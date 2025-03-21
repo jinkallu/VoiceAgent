@@ -8,7 +8,11 @@ from jose import jwt, JWTError
 import datetime
 import random
 from database import SessionLocal, engine, Base, User
-from list_resources import ListResources
+from azure_ops import AzureOps
+import os
+
+
+azureOps = AzureOps()
 
 # JWT settings
 SECRET_KEY = "your_secret_key"
@@ -47,11 +51,13 @@ class UserRegister(BaseModel):
 class UserLogin(BaseModel):
     username: str
     password: str
+class ProductRequest(BaseModel):
+    rg_name: str  # Expected data key (resource group name)
 
 # Helper function to create a JWT token
 def create_access_token(username: str):
     expires_delta = datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    expire = datetime.datetime.utcnow() + expires_delta
+    expire = datetime.datetime.now(datetime.timezone.utc) + expires_delta
     to_encode = {"sub": username, "exp": expire}
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -84,15 +90,44 @@ def login(user_data: UserLogin, db: Session = Depends(get_db)):
     access_token = create_access_token(user_data.username)
     return {"access_token": access_token}
 
-@app.get("/protected/")
-def protected_route(authorization: str = Header(...)):
+def authorised(authorization):
     try:
         # Expecting header: "Bearer <token>"
         token = authorization.split(" ")[1]
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username = payload.get("sub")
-        listReources = ListResources()
-        resource_groups  = listReources.list_resource_groups()
-        return {"message": f"Welcome, {username}!", "resource_groups": resource_groups}
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        return payload
+    except JWTError as e:
+        print(e)
+        if 'exp' in str(e):
+            raise HTTPException(status_code=401, detail="Token expired")
+        else:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    
+
+
+@app.get("/protected/")
+def protected_route(authorization: str = Header(...)):
+    payload = authorised(authorization)
+    username = payload.get("sub")
+    resource_groups  = [azureOps.listResources.list_resource_groups()[1]] # TODO: proper one
+    return {"message": f"Welcome, {username}!", "resource_groups": resource_groups}
+
+@app.post("/products/")
+def products(request_data: ProductRequest, authorization: str = Header(...)):
+    payload = authorised(authorization)
+    blob_storage = azureOps.listResources.get_blobstorage_from_resource_group(request_data.rg_name)
+    if len(blob_storage) == 0:
+        return
+    
+    azureOps.blobOps.setBlobServiceClient(storage_name=blob_storage[0]["name"])
+    azureOps.blobOps.setContainerClient(os.environ.get("PRODUCTS_BLOB_CONTAINER"))
+    products = azureOps.blobOps.getStorageMappingAsJson(os.environ.get("MAPPING_BLOB"))
+
+    product_list = []
+
+    for product in products:
+        for key, value in product.items():
+            product_list.append({"name": key, "pdf": value})
+
+
+    return {"products": product_list}
