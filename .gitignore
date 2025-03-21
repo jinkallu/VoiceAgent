@@ -25,7 +25,11 @@ yarn-error.log*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[cod]
-*$py.class
-*.pyc
+backend/__pycache__/
+backend/*.py[cod]
+backend/*$py.class
+backend/*.pyc
+
+.env
+test.db
 
