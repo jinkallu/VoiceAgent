@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
+import Product from "./Product";
 
 const Products = ({ token, products }) => {
     const [message, setMessage] = useState("");
+    
+
 
     return (
         <div>
@@ -10,9 +13,7 @@ const Products = ({ token, products }) => {
             <ul>
                 {products.length > 0 ? (
                     products.map((p, pindex) => (
-                        <li key={pindex}>
-                            <strong>{p.name}</strong>
-                        </li>
+                        <Product token={token} index={pindex} product={p}/>
                     )
                     )
                 ) : (

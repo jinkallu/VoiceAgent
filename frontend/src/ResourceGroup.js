@@ -43,7 +43,7 @@ const ResourceGroup = ({ token, resourceGroups }) => {
           resourceGroups.map((rg, index) => (
             <li key={index}>
               <strong>{rg.name}</strong> - {rg.location}
-              <Products products={products}/>
+              <Products token={token} products={products}/>
             </li>
           ))
         ) : (

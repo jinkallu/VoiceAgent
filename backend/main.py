@@ -54,6 +54,9 @@ class UserLogin(BaseModel):
 class ProductRequest(BaseModel):
     rg_name: str  # Expected data key (resource group name)
 
+class ProductDataRequest(BaseModel):
+    product_name: str  # Expected data key (resource group name)
+
 # Helper function to create a JWT token
 def create_access_token(username: str):
     expires_delta = datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -131,3 +134,11 @@ def products(request_data: ProductRequest, authorization: str = Header(...)):
 
 
     return {"products": product_list}
+
+@app.post("/product_data/")
+def product_data(request_data: ProductDataRequest, authorization: str = Header(...)):
+    payload = authorised(authorization)
+    product_data = azureOps.blobOps.getStorageMappingAsJson(request_data.product_name)
+    print(product_data)
+
+    return {"product_data": product_data}

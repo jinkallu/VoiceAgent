@@ -46,6 +46,11 @@ class BlobOps:
     def getStorageMappingAsJson(self, mapping_blob_name):
         json_str = self.getStorageMapping(mapping_blob_name)
         return json.loads(json_str)
+    
+    def getProductAsJson(self, product_blob_name):
+        json_str = self.getBlobData(product_blob_name)
+        return json.loads(json_str)
+
 
 
 
