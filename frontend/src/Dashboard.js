@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import ResourceGroup from "./ResourceGroup";
 
 const Dashboard = ({ token, setToken }) => {
   const [message, setMessage] = useState("");
   const [resourceGroups, setResourceGroups] = useState([]);
+  
 
 
   useEffect(() => {
@@ -22,18 +24,8 @@ const Dashboard = ({ token, setToken }) => {
     <div>
       <h2>Dashboard</h2>
       <p>{message}</p>
-      <ul>
-          {resourceGroups.length > 0 ? (
-            resourceGroups.map((rg, index) => (
-              <li key={index}>
-                <strong>{rg.name}</strong> - {rg.location}
-              </li>
-            ))
-          ) : (
-            <p>No resource groups found</p>
-          )}
-        </ul>
-        <p>{message}</p>
+      <ResourceGroup token={token} resourceGroups={resourceGroups} />
+
       <button onClick={() => setToken("")}>Logout</button>
     </div>
   );

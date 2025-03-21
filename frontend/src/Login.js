@@ -13,9 +13,11 @@ const Login = ({ setToken }) => {
     });
 
     const data = await response.json();
+    console.log("***", data)
     if (response.ok) {
+      console.log(data.access_token)
       setToken(data.access_token);
-      //localStorage.setItem("token", data.access_token);
+      localStorage.setItem("token", data.access_token);
       window.location.href = "/dashboard";
     } else {
       setError("Invalid username or password");
