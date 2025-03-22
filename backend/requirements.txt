@@ -10,3 +10,4 @@ azure-identity
 azure-mgmt-resource
 azure-storage-blob
 azure-mgmt-storage
+azure-mgmt-appcontainers

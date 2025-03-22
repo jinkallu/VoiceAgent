@@ -18,5 +18,5 @@ class StorageManagement:
             )
             account_result = poller.result()
             return True
-        except:
-            print("Error in creating storage account")
+        except Exception as e:
+            print(f"Error in creating storage account{e}")
