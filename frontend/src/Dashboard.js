@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ResourceGroup from "./ResourceGroup";
+import FileUpload from "./FileUpload";
 
 const Dashboard = ({ token, setToken }) => {
   const [message, setMessage] = useState("");
@@ -25,7 +26,7 @@ const Dashboard = ({ token, setToken }) => {
       <h2>Dashboard</h2>
       <p>{message}</p>
       <ResourceGroup token={token} resourceGroups={resourceGroups} />
-
+      <FileUpload token={token} />
       <button onClick={() => setToken("")}>Logout</button>
     </div>
   );

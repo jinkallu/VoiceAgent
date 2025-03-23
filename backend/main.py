@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, File, UploadFile, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Header
 from sqlalchemy.orm import Session
@@ -144,3 +144,20 @@ def product_data(request_data: ProductDataRequest, authorization: str = Header(.
     
 
     return {"product_data": product_data}
+
+@app.post("/upload/")
+def upload(file: UploadFile = File(...), authorization: str = Header(...)):
+    payload = authorised(authorization)
+    # Check if it's a PDF
+    if file.content_type != "application/pdf":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only PDF files are accepted."
+        )
+
+    # For demo: read the file content (you can also save it to disk or cloud)
+    #contents = await file.read()
+    #file_size = len(contents)
+
+    print(f"Received file: {file.filename}")
+
