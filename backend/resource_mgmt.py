@@ -1,14 +1,8 @@
 from azure.mgmt.resource import ResourceManagementClient
 
-import os
-from dotenv import load_dotenv
 
-class ListResources:
-    def __init__(self, credential):
-        if not os.environ.get("AZURE_SUBSCRIPTION_ID"):
-            load_dotenv()
-
-        AZURE_SUBSCRIPTION_ID = os.environ.get("AZURE_SUBSCRIPTION_ID")
+class ResourceManagement:
+    def __init__(self, credential, AZURE_SUBSCRIPTION_ID):
 
         # Initialize the ResourceManagementClient with your Azure subscription ID
         #subscription_id = "<your-subscription-id>"  # Replace with your Azure subscription ID
@@ -55,11 +49,22 @@ class ListResources:
         return blob_storage
         #return self.client.resources.get(resource_group_name, resource_type)
         #self.client.resources.
+
+    def createResourceGroup(self, rg_name, location):
+        try:
+            # Create the resource group
+            resource_group_params = {"location": location}
+            self.client.resource_groups.create_or_update(rg_name, resource_group_params)
+            return True
+        except:
+            print("Error in creating rg")
+
          
 
 
 if __name__ == "__main__":
-    listResources = ListResources()
+    listResources = ResourceManagement()
     listResources.list_resource_groups()
+
     pass
     #list_resource_groups()

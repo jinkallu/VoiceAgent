@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, File, UploadFile, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Header
 from sqlalchemy.orm import Session
@@ -10,9 +10,12 @@ import random
 from database import SessionLocal, engine, Base, User
 from azure_ops import AzureOps
 import os
+from process_pdf import ProcessPDF
+import base64
 
 
 azureOps = AzureOps()
+processPDF = ProcessPDF()
 
 # JWT settings
 SECRET_KEY = "your_secret_key"
@@ -56,6 +59,9 @@ class ProductRequest(BaseModel):
 
 class ProductDataRequest(BaseModel):
     product_name: str  # Expected data key (resource group name)
+
+class ProductImgDataRequest(BaseModel):
+    img_url: str  # Expected data key (resource group name)
 
 # Helper function to create a JWT token
 def create_access_token(username: str):
@@ -112,13 +118,13 @@ def authorised(authorization):
 def protected_route(authorization: str = Header(...)):
     payload = authorised(authorization)
     username = payload.get("sub")
-    resource_groups  = [azureOps.listResources.list_resource_groups()[1]] # TODO: proper one
+    resource_groups  = [azureOps.resourceManagement.list_resource_groups()[1]] # TODO: proper one
     return {"message": f"Welcome, {username}!", "resource_groups": resource_groups}
 
 @app.post("/products/")
 def products(request_data: ProductRequest, authorization: str = Header(...)):
     payload = authorised(authorization)
-    blob_storage = azureOps.listResources.get_blobstorage_from_resource_group(request_data.rg_name)
+    blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(request_data.rg_name)
     if len(blob_storage) == 0:
         return
     
@@ -130,7 +136,7 @@ def products(request_data: ProductRequest, authorization: str = Header(...)):
 
     for product in products:
         for key, value in product.items():
-            product_list.append({"name": key, "pdf": value})
+            product_list.append({"name": key, "json": value})
 
 
     return {"products": product_list}
@@ -139,8 +145,43 @@ def products(request_data: ProductRequest, authorization: str = Header(...)):
 def product_data(request_data: ProductDataRequest, authorization: str = Header(...)):
     payload = authorised(authorization)
     product_data = azureOps.blobOps.getProductAsJson(request_data.product_name)
-    print(product_data)
     #print(azureOps.blobOps.createContainerIfNotExists("test"))
     
 
     return {"product_data": product_data}
+
+@app.post("/upload/")
+async def upload(file: UploadFile = File(...), authorization: str = Header(...)):
+    payload = authorised(authorization)
+    # Check if it's a PDF
+    if file.content_type != "application/pdf":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only PDF files are accepted."
+        )
+
+    pdf_bytes = await file.read()
+    problems_data, images = processPDF.process(file_data = pdf_bytes)
+    print(problems_data)
+    azureOps.blobOps.setBlobServiceClient("tralpinestorage1")
+    azureOps.blobOps.setContainerClient(os.environ.get("PRODUCTS_BLOB_CONTAINER"))
+
+    azureOps.blobOps.createOrReplaceBlobFromPyDict("test_product.json", problems_data)
+
+    print(f"Received file: {file.filename}")
+
+@app.post("/product_image/")
+def product_image(request_data: ProductImgDataRequest, authorization: str = Header(...)):
+    payload = authorised(authorization)
+    azureOps.blobOps.setBlobServiceClient("tralpinestorage1")
+    azureOps.blobOps.setContainerClient(os.environ.get("PRODUCTS_BLOB_CONTAINER"))
+    img_url = f"images/{request_data.img_url}"
+    print("***** ", img_url)
+    product_image_bytes = azureOps.blobOps.getBlobData(img_url)
+    #print(azureOps.blobOps.createContainerIfNotExists("test"))
+    
+    base64_str = None
+    if product_image_bytes:
+        base64_str = base64.b64encode(product_image_bytes).decode("utf-8")
+    return {"image_data": base64_str}
+

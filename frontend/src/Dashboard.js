@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ResourceGroup from "./ResourceGroup";
+import FileUpload from "./FileUpload";
 
 const Dashboard = ({ token, setToken }) => {
   const [message, setMessage] = useState("");
@@ -15,7 +16,7 @@ const Dashboard = ({ token, setToken }) => {
       .then((data) => {
         console.log("Fetched data:", data);
         setResourceGroups(data.resource_groups || []);
-        setMessage(data.message);
+        setMessage(data.detail);
       })
       .catch(() => setMessage("Unauthorized"));
   }, [token]);
@@ -25,7 +26,7 @@ const Dashboard = ({ token, setToken }) => {
       <h2>Dashboard</h2>
       <p>{message}</p>
       <ResourceGroup token={token} resourceGroups={resourceGroups} />
-
+      <FileUpload token={token} />
       <button onClick={() => setToken("")}>Logout</button>
     </div>
   );
