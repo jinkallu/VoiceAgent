@@ -10,9 +10,11 @@ import random
 from database import SessionLocal, engine, Base, User
 from azure_ops import AzureOps
 import os
+from process_pdf import ProcessPDF
 
 
 azureOps = AzureOps()
+processPDF = ProcessPDF()
 
 # JWT settings
 SECRET_KEY = "your_secret_key"
@@ -146,7 +148,7 @@ def product_data(request_data: ProductDataRequest, authorization: str = Header(.
     return {"product_data": product_data}
 
 @app.post("/upload/")
-def upload(file: UploadFile = File(...), authorization: str = Header(...)):
+async def upload(file: UploadFile = File(...), authorization: str = Header(...)):
     payload = authorised(authorization)
     # Check if it's a PDF
     if file.content_type != "application/pdf":
@@ -155,9 +157,12 @@ def upload(file: UploadFile = File(...), authorization: str = Header(...)):
             detail="Only PDF files are accepted."
         )
 
-    # For demo: read the file content (you can also save it to disk or cloud)
-    #contents = await file.read()
-    #file_size = len(contents)
+    pdf_bytes = await file.read()
+    problems_steps, images = processPDF.process(file_data = pdf_bytes)
+    azureOps.blobOps.setBlobServiceClient("tralpinestorage1")
+    azureOps.blobOps.setContainerClient(os.environ.get("PRODUCTS_BLOB_CONTAINER"))
+
+    azureOps.blobOps.createOrReplaceBlobFromPyDict("test_product.json", problems_steps)
 
     print(f"Received file: {file.filename}")
 

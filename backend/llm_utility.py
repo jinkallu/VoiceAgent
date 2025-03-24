@@ -40,7 +40,7 @@ class LLMUtility:
             🎯 Format the response as clean JSON:
             [
             {
-                "problem": "<Describe the user-facing issue or symptom>",
+                "problem": "<Describe the user-facing issue or symptom>"
             },
             ...
             ]
@@ -121,6 +121,52 @@ class LLMUtility:
             ]
 
             Be specific, concise, and avoid repetition, find as many problems as possible.
+        """.strip()
+
+        data = {
+            "messages": [
+                {
+                    "role": "system", 
+                    "content": system_message
+                },
+                {
+                    "role": "user", 
+                    "content": query
+                }
+            ],
+            "temperature": 0.2,
+            "seed": 1
+        }
+        return self.call_4o (data)
+    
+    def howto_step1(self, query):
+        system_message = """
+            You are a technical documentation assistant.
+
+            You will receive raw, unstructured text extracted from a PDF manual or troubleshooting guide. Your job is to read and analyze this text to identify useful and practical how-to problems.
+
+            ❌ Do NOT include:
+            - Legal disclaimers
+            - Battery warnings
+            - Safety notices that do not involve how-to solving
+            - Generic installation instructions unless they are part of a how-to problem
+
+            ✅ DO include:
+            - Real-world how-to issues users might face (e.g., how to turn on device, how to solve paper jam, how to connect to Wi-Fi network)
+            - Specific error messages that require action
+            - Any described symptoms that can be mapped to a how-to problem
+
+            🧠 Reason about *implied* how-to problems too — not just ones directly mentioned.
+
+            🎯 Format the response as clean JSON:
+            [
+            {
+                "problem": "<Describe the user-facing how-to issue>",
+            },
+            ...
+            ]
+
+            Be specific, concise, and avoid repetition, find as many how-to problems as possible.
         """.strip()
 
         data = {
