@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ImageResource from "./ImageResource";
 
 const Solution = ({ token, index, step }) => {
 
@@ -8,6 +9,7 @@ const Solution = ({ token, index, step }) => {
             <li key={index}>
                 <strong>{step}</strong>
             </li>
+            <ImageResource />
 
         </div>
     );

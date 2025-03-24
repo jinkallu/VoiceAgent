@@ -107,7 +107,7 @@ class LLMUtility:
 
             You will receive raw, unstructured text extracted from a PDF manual or troubleshooting guide. Your job is to read and analyze this text to identify useful and practical troubleshooting problems.
 
-            In a previous step, an LLM identifies following problems : {problems}, check them against the document and add solutions steps to the corresponding problems.
+            In a previous step, an LLM identifies following problems : {problems}, check all of them against the document and add solutions steps to the corresponding problems. Don't miss any of them.
 
             🧠 Reason about *implied* problems too — not just ones directly mentioned.
 

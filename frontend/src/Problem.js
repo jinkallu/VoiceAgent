@@ -21,7 +21,7 @@ const Problem = ({ token, index, problem }) => {
 
             <li key={index}>
                 {problem && problem["problem"] &&
-                    <strong>{problem["problem"]}</strong>
+                    <strong>{index}. {problem["problem"]}</strong>
                 }
             </li>
             <ul>

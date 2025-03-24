@@ -11,6 +11,7 @@ from database import SessionLocal, engine, Base, User
 from azure_ops import AzureOps
 import os
 from process_pdf import ProcessPDF
+import base64
 
 
 azureOps = AzureOps()
@@ -58,6 +59,9 @@ class ProductRequest(BaseModel):
 
 class ProductDataRequest(BaseModel):
     product_name: str  # Expected data key (resource group name)
+
+class ProductImgDataRequest(BaseModel):
+    img_url: str  # Expected data key (resource group name)
 
 # Helper function to create a JWT token
 def create_access_token(username: str):
@@ -157,11 +161,27 @@ async def upload(file: UploadFile = File(...), authorization: str = Header(...))
         )
 
     pdf_bytes = await file.read()
-    problems_steps, images = processPDF.process(file_data = pdf_bytes)
+    problems_data, images = processPDF.process(file_data = pdf_bytes)
+    print(problems_data)
     azureOps.blobOps.setBlobServiceClient("tralpinestorage1")
     azureOps.blobOps.setContainerClient(os.environ.get("PRODUCTS_BLOB_CONTAINER"))
 
-    azureOps.blobOps.createOrReplaceBlobFromPyDict("test_product.json", problems_steps)
+    azureOps.blobOps.createOrReplaceBlobFromPyDict("test_product.json", problems_data)
 
     print(f"Received file: {file.filename}")
+
+@app.post("/product_image/")
+def product_image(request_data: ProductImgDataRequest, authorization: str = Header(...)):
+    payload = authorised(authorization)
+    azureOps.blobOps.setBlobServiceClient("tralpinestorage1")
+    azureOps.blobOps.setContainerClient(os.environ.get("PRODUCTS_BLOB_CONTAINER"))
+    img_url = f"images/{request_data.img_url}"
+    print("***** ", img_url)
+    product_image_bytes = azureOps.blobOps.getBlobData(img_url)
+    #print(azureOps.blobOps.createContainerIfNotExists("test"))
+    
+    base64_str = None
+    if product_image_bytes:
+        base64_str = base64.b64encode(product_image_bytes).decode("utf-8")
+    return {"image_data": base64_str}
 
