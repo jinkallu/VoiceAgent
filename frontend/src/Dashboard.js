@@ -16,7 +16,7 @@ const Dashboard = ({ token, setToken }) => {
       .then((data) => {
         console.log("Fetched data:", data);
         setResourceGroups(data.resource_groups || []);
-        setMessage(data.message);
+        setMessage(data.detail);
       })
       .catch(() => setMessage("Unauthorized"));
   }, [token]);

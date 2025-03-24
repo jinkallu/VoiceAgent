@@ -132,7 +132,7 @@ def products(request_data: ProductRequest, authorization: str = Header(...)):
 
     for product in products:
         for key, value in product.items():
-            product_list.append({"name": key, "pdf": value})
+            product_list.append({"name": key, "json": value})
 
 
     return {"products": product_list}
@@ -141,7 +141,6 @@ def products(request_data: ProductRequest, authorization: str = Header(...)):
 def product_data(request_data: ProductDataRequest, authorization: str = Header(...)):
     payload = authorised(authorization)
     product_data = azureOps.blobOps.getProductAsJson(request_data.product_name)
-    print(product_data)
     #print(azureOps.blobOps.createContainerIfNotExists("test"))
     
 

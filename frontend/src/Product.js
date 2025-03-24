@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Problem from "./Problem";
 
 const Product = ({ token, index, product }) => {
     const [message, setMessage] = useState("");
@@ -10,10 +11,11 @@ const Product = ({ token, index, product }) => {
         if (!product) {
             return
         }
+        console.log(product)
 
         // Define your request payload
         const requestData = {
-            product_name: "test.json",  // Example data to send
+            product_name: product.json || null,  // Example data to send
         };
 
 
@@ -42,9 +44,17 @@ const Product = ({ token, index, product }) => {
             <li key={index}>
                 <strong>{product.name}</strong>
             </li>
-            {product_data &&
-                <p>{product_data[0]["problem"]}</p>
-            }
+            <ul>
+                {product_data.length > 0 ? (
+                    product_data.map((p, pindex) => (
+                        <Problem token={token} index={pindex} problem={p} />
+                    )
+                    )
+                ) : (
+                    <p>No Problems found</p>
+                )}
+
+            </ul>
 
 
         </div>
