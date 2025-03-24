@@ -63,18 +63,23 @@ class BlobOps:
             return True
         except Exception as e:
             print("Container may already exist:", e)
-    
-    def createOrReplaceBlobFromJson(self, blob_name, json_data):
+
+    def createOrUpdateBlob(self, blob_name, blob_bytes):
         blob_client = self.container_client.get_blob_client(blob_name)
         try:
             # Upload the JSON string
-            blob_client.upload_blob(json_data, overwrite=True)
+            blob_client.upload_blob(blob_bytes, overwrite=True)
             return True
         except AzureError as e:
             print(f"❌ Azure error occurred: {e}")
 
         except Exception as e:
             print(f"❌ Unexpected error: {e}")
+
+    
+    def createOrReplaceBlobFromJson(self, blob_name, json_data):
+        self.createOrUpdateBlob(blob_name, json_data)
+        
 
     def createOrReplaceBlobFromPyDict(self, blob_name, py_dict):
         # Convert to string or bytes
