@@ -14,14 +14,17 @@ class LogAnalyticsMgmt:
         )
 
         # Create or update workspace
-        poller = self.loanalytics_client.workspaces.begin_create_or_update(
-            resource_group_name=rg_name,
-            workspace_name=workspace_name,
-            parameters=workspace_params
-        )
-        workspace = poller.result()
+        try:
+            poller = self.loanalytics_client.workspaces.begin_create_or_update(
+                resource_group_name=rg_name,
+                workspace_name=workspace_name,
+                parameters=workspace_params
+            )
+            workspace = poller.result()
+            return workspace
 
-        print(f"✅ Log Analytics Workspace created: {workspace.customer_id}")
+        except Exception as e:
+            print(f"Workspace creation failed: {e}")
 
     def getSharedKeys(self, rg_name, workspace_name):
         shared_keys = self.loanalytics_client.shared_keys.get_shared_keys(
@@ -29,8 +32,7 @@ class LogAnalyticsMgmt:
             workspace_name=workspace_name
         )
 
-        print("Shared Key:", shared_keys.primary_shared_key)
-
+        return shared_keys.primary_shared_key
     # tests
     def test_create_loganalytics_workspace(self):
         self.createWorkSpace("test", "test-log-analytics", "westeurope")
