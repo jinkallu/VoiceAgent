@@ -3,6 +3,7 @@ from resource_mgmt import ResourceManagement
 from storage_mgmt import StorageManagement
 from blob_ops import BlobOps
 from container_mgmt import ContainerManagement
+from loganalytics_mgmt import LogAnalyticsMgmt
 
 import os
 from dotenv import load_dotenv
@@ -20,11 +21,20 @@ class AzureOps:
         self.blobOps = BlobOps()
         self.storageManagement = StorageManagement(credential, AZURE_SUBSCRIPTION_ID)
         self.containerManagement = ContainerManagement(credential, AZURE_SUBSCRIPTION_ID)
+        self.logAnalyticsMgmt = LogAnalyticsMgmt(credential, AZURE_SUBSCRIPTION_ID)
+
+def test_create_container_env(azure_ops):
+    azure_ops.containerManagement.createContainerEnv("test", "test-env", "westeurope")
+
+
+
 
 if __name__ == "__main__":
     azure_ops = AzureOps()
-    azure_ops.resourceManagement.list_resource_groups()
+    #azure_ops.resourceManagement.list_resource_groups()
     #azure_ops.resourceManagement.createResourceGroup("test", "westeurope")
     #azure_ops.resourceManagement.list_resource_groups()
     #azure_ops.storageManagement.createStorageAccount("test", "ppooeejdhgsfsd", "westeurope")
-    print(azure_ops.containerManagement.getContainerAppURL("rg-testagent5", "capps-backend-s2kzrdow3y3rq"))
+    #print(azure_ops.containerManagement.getContainerAppURL("rg-testagent5", "capps-backend-s2kzrdow3y3rq"))
+    test_create_container_env(azure_ops)
+    #azure_ops.logAnalyticsMgmt.test_getSharedKeys("test", "test-log-analytics")
