@@ -4,6 +4,7 @@ import io
 import tiktoken
 from llm_utility import LLMUtility
 import json
+from io import BytesIO
 
 class ProcessPDF:
     def __init__(self):
@@ -14,7 +15,7 @@ class ProcessPDF:
 
 
     def process(self, pdf_path=None, file_data=None):
-        text, images, image_names = self.extract_pdf(pdf_path, file_data, img_flag=True)
+        text, images, image_names = self.extract_pdf(pdf_path, file_data, img_flag=True, max_img_size=5)
         token_count = self.count_tokens(text)
         print("Token count:", token_count)
         ts_step_1 = self.lLMUtility.troubelshooting_step1(text)
@@ -50,7 +51,25 @@ class ProcessPDF:
         tokens = encoding.encode(text)
         return len(tokens)
     
-    def extract_pdf_data(self, doc, img_flag=False):
+    def compress_to_target_size(self, img, target_size_mb):
+
+        quality = 95
+        while quality > 10:
+            buffer = BytesIO()
+            img.save(buffer, format="JPEG", quality=quality)
+            size_mb = len(buffer.getvalue()) / 1024 / 1024
+            if size_mb <= target_size_mb:
+                print(f"Reached {size_mb:.2f} MB at quality {quality}")
+                buffer.seek(0)
+                return buffer
+            quality -= 5
+        print("Could not compress image")
+        buffer = BytesIO()
+        img.save(buffer, format="JPEG", quality=10)
+        buffer.seek(0)
+        return buffer
+    
+    def extract_pdf_data(self, doc, img_flag=False, max_img_size=5): # max_img_size mb
         text = ""
         images = []
         image_names = []
@@ -66,21 +85,30 @@ class ProcessPDF:
 
                     # Convert to high-quality PIL image
                     image = Image.open(io.BytesIO(image_bytes))
-                    img_name = f"image_page{page_num+1}_{img_index}.{image_ext}"
-                    images.append({img_name: image})
+                    if image.format == 'PNG':
+                        image = image.convert("RGB")
+                        image_ext = "jpeg"
+
+                    #image = self.compress_to_target_size(image, max_img_size) # compress image to 5mb
+                    buffer = BytesIO()
+                    image.save(buffer, format="JPEG", quality=100)
+                    buffer.seek(0)
+
+                    img_name = f"image_page_{page_num+1}_{img_index}.{image_ext}"
+                    images.append({img_name: buffer})
                     image_names.append(img_name)
         
         return text, images, image_names
 
 
-    def extract_pdf(self, pdf_path=None, file_data=None, img_flag=False):
+    def extract_pdf(self, pdf_path=None, file_data=None, img_flag=False, max_img_size=5):
         
         if pdf_path:
             with pymupdf.open(pdf_path) as doc:
-                return self.extract_pdf_data(doc, img_flag)
+                return self.extract_pdf_data(doc, img_flag, max_img_size)
         else:
             with pymupdf.open(stream=file_data, filetype="pdf") as doc:
-                return self.extract_pdf_data(doc, img_flag)            
+                return self.extract_pdf_data(doc, img_flag, max_img_size)            
     
 if __name__ == "__main__":
     processPDF = ProcessPDF()

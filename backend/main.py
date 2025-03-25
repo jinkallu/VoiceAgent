@@ -168,6 +168,12 @@ async def upload(file: UploadFile = File(...), authorization: str = Header(...))
 
     azureOps.blobOps.createOrReplaceBlobFromPyDict("test_product.json", problems_data)
 
+    for img_dict in images:
+        for name, img in img_dict.items():
+            name = "images/" + name
+            azureOps.blobOps.createOrUpdateBlob(name, img)
+
+
     print(f"Received file: {file.filename}")
 
 @app.post("/product_image/")
