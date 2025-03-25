@@ -7,10 +7,9 @@ from container_mgmt import ContainerManagement
 import os
 from dotenv import load_dotenv
 
+load_dotenv()
 class AzureOps:
     def __init__(self):
-        if not os.environ.get("AZURE_SUBSCRIPTION_ID"):
-            load_dotenv()
 
         AZURE_SUBSCRIPTION_ID = os.environ.get("AZURE_SUBSCRIPTION_ID")
 

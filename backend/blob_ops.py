@@ -6,6 +6,7 @@ import json
 from dotenv import load_dotenv
 
 
+load_dotenv()
 
 class BlobOps:
     def __init__(self):
@@ -13,8 +14,6 @@ class BlobOps:
         self.container_client = None
         self.blob_client = None
 
-        if not os.environ.get("PRODUCTS_BLOB_CONTAINER"):
-            load_dotenv()
         
 
     def setBlobServiceClient(self, storage_name):
@@ -23,6 +22,12 @@ class BlobOps:
 
         # Create the BlobServiceClient object
         self.blob_service_client = BlobServiceClient(connection_url, credential=default_credential)
+
+    def getContainersList(self):
+        containers=self.blob_service_client.list_containers()
+        print("containers",containers)
+        return containers
+    
 
     def setContainerClient(self, container_name):
         # Get a container client to interact with the container
@@ -41,7 +46,7 @@ class BlobOps:
             #content_str = content.decode('utf-8')
         
             return content
-        except:
+        except Exception as e:
             print("Blob read error", blob_name)
     
     def getStorageMapping(self, mapping_blob_name):

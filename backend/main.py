@@ -91,14 +91,31 @@ def register(user_data: UserRegister, db: Session = Depends(get_db)):
 
 
 @app.post("/login/")
-def login(user_data: UserLogin, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == user_data.username).first()
-    if not user or not pwd_context.verify(user_data.password, user.hashed_password):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+def login(user_data: UserLogin,):
+    # user = db.query(User).filter(User.username == user_data.username).first()
+    # if not user or not pwd_context.verify(user_data.password, user.hashed_password):
+    #     raise HTTPException(status_code=401, detail="Invalid credentials")
+    try:
+        blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(os.getenv("AZURE_ADMIN_RESOURCE_GROUP"))
+        if(len(blob_storage)>0):
+            storageName=blob_storage[0]["name"]
+            azureOps.blobOps.setBlobServiceClient(storage_name=storageName)
+            azureOps.blobOps.setContainerClient(os.getenv("AZURE_ADMIN_CONTAINER_NAME"))
 
-    access_token = create_access_token(user_data.username)
-    return {"access_token": access_token}
+            userData=azureOps.blobOps.getStorageMappingAsJson(os.getenv("AZURE_ADMIN_BLOB_NAME"))
+            user={}
+            if(len(userData)>0):
+                for item in userData:
+                    if(item['username']==user_data.username and item['password']==user_data.password):
+                        user=item
+                        access_token = create_access_token(user_data.username)
+                        return {"access_token": access_token,"resource_groups":item.get('resourceGroups') or []}
 
+    except Exception as e:
+        print(e)
+        return None    
+
+    
 def authorised(authorization):
     try:
         # Expecting header: "Bearer <token>"
@@ -114,7 +131,7 @@ def authorised(authorization):
     
 
 
-@app.get("/protected/")
+@app.get("/resourcegroups/")
 def protected_route(authorization: str = Header(...)):
     payload = authorised(authorization)
     username = payload.get("sub")
@@ -125,21 +142,24 @@ def protected_route(authorization: str = Header(...)):
 def products(request_data: ProductRequest, authorization: str = Header(...)):
     payload = authorised(authorization)
     blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(request_data.rg_name)
+    print(blob_storage[0]["name"])
     if len(blob_storage) == 0:
         return
     
     azureOps.blobOps.setBlobServiceClient(storage_name=blob_storage[0]["name"])
-    azureOps.blobOps.setContainerClient(os.environ.get("PRODUCTS_BLOB_CONTAINER"))
-    products = azureOps.blobOps.getStorageMappingAsJson(os.environ.get("MAPPING_BLOB"))
 
-    product_list = []
+    containers=azureOps.blobOps.getContainersList()
+    prdContainers=[]
+    for container in containers:
+        nameArray=container["name"].split("-")
+        if(nameArray[0]=="prd"):
+            prdContainers.append("-".join(nameArray[1:]))
+            
+    print("containers",prdContainers)
 
-    for product in products:
-        for key, value in product.items():
-            product_list.append({"name": key, "json": value})
+   
 
-
-    return {"products": product_list}
+    return {"products": prdContainers}
 
 @app.post("/product_data/")
 def product_data(request_data: ProductDataRequest, authorization: str = Header(...)):
