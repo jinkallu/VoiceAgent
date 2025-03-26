@@ -4,6 +4,10 @@ from storage_mgmt import StorageManagement
 from blob_ops import BlobOps
 from container_mgmt import ContainerManagement
 from loganalytics_mgmt import LogAnalyticsMgmt
+from container_reg_mgmt import ContainerRegistryMgmt
+
+import random
+import string
 
 import os
 from dotenv import load_dotenv
@@ -13,36 +17,89 @@ class AzureOps:
         if not os.environ.get("AZURE_SUBSCRIPTION_ID"):
             load_dotenv()
 
-        AZURE_SUBSCRIPTION_ID = os.environ.get("AZURE_SUBSCRIPTION_ID")
+        self.AZURE_SUBSCRIPTION_ID = os.environ.get("AZURE_SUBSCRIPTION_ID")
 
         default_credential = DefaultAzureCredential()
         credential = default_credential
-        self.resourceManagement = ResourceManagement(credential, AZURE_SUBSCRIPTION_ID)
+        self.resourceManagement = ResourceManagement(credential, self.AZURE_SUBSCRIPTION_ID)
         self.blobOps = BlobOps()
-        self.storageManagement = StorageManagement(credential, AZURE_SUBSCRIPTION_ID)
-        self.containerManagement = ContainerManagement(credential, AZURE_SUBSCRIPTION_ID)
-        self.logAnalyticsMgmt = LogAnalyticsMgmt(credential, AZURE_SUBSCRIPTION_ID)
+        self.storageManagement = StorageManagement(credential, self.AZURE_SUBSCRIPTION_ID)
+        self.containerManagement = ContainerManagement(credential, self.AZURE_SUBSCRIPTION_ID)
+        self.logAnalyticsMgmt = LogAnalyticsMgmt(credential, self.AZURE_SUBSCRIPTION_ID)
+        self.containerRegistryMgmt = ContainerRegistryMgmt(credential, self.AZURE_SUBSCRIPTION_ID)
+
+    def generate_random_alphanumeric(self, length):
+        characters = string.ascii_letters + string.digits  # a-z, A-Z, 0-9
+        return ''.join(random.choices(characters, k=length))
 
     def provision_resources(self, rg_name, location="westeurope"):
         # Create resource group
         # Create Lognalytics workspace
         workspace_name = "test-loganalytics"
-        workspace = self.logAnalyticsMgmt.createWorkSpace(rg_name, workspace_name, location)
+        workspace = self.logAnalyticsMgmt.getWorkSpace(rg_name, workspace_name)
         if workspace is None:
-            # TODO: Manage error
-            pass
+            workspace = self.logAnalyticsMgmt.createWorkSpace(rg_name, workspace_name, location)
+            if workspace is None:
+                # TODO: Manage workspace creation error
+                pass
+        else:
+            print("Log analytics workspace already exists")
         # Create Container Apps Env
         env_name = "test-env"
-        shared_key = self.logAnalyticsMgmt.getSharedKeys(rg_name, workspace_name)
-        env = self.containerManagement.createContainerEnv(rg_name, env_name, location, workspace.customer_id, shared_key)
+        env = self.containerManagement.getContainerAppsEnv(rg_name, env_name)
         if env is None:
-            # TODO: Manage error
-            pass
+            shared_key = self.logAnalyticsMgmt.getSharedKeys(rg_name, workspace_name)
+            env = self.containerManagement.createContainerEnv(rg_name, env_name, location, workspace.customer_id, shared_key)
+            if env is None:
+                # TODO: Manage container apps env creation error
+                pass
+        else:
+            print("container apps env already exists")
         # Create blob storage
-        # Create managed identity
+        storage_account_name = "ppooeejdhgsfsd" # TODO: create random name, as it is global
+        storage_account = self.storageManagement.getStorageAccount(rg_name, storage_account_name)
+        if storage_account is None:
+            storage_account = self.storageManagement.createStorageAccount(rg_name, storage_account_name, location)
+            if storage_account is None:
+                # TODO: Manage storage account creation error
+                pass
+        else:
+            print("storage account already exists")
+
         # container registry
+        registry_name = None
+        for i in range(5):
+            registry_name = "test" + self.generate_random_alphanumeric(5)
+            if self.containerRegistryMgmt.nameAvailable(registry_name):
+                break
+
+        registry = None
+        if registry is None:
+            #registry = self.containerRegistryMgmt.createContainerRegistry(rg_name, registry_name, location)
+            if registry is None:
+                # TODO: Manage container registry creation error
+                pass
+            else:
+                print("Created container Registry")
+        else:
+            print("container registry already exists")
+
+
+        #Container App
+        app_name = "test-app"
+        app = self.containerManagement.getContainerApp(rg_name, app_name)
+        if app is None:
+            shared_key = self.logAnalyticsMgmt.getSharedKeys(rg_name, workspace_name)
+            env = self.containerManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, app_name, location)
+            if env is None:
+                # TODO: Manage container apps env creation error
+                pass
+        else:
+            print("container apps env already exists")
+
+        # Create managed identity
         # AI services
-        # Container App
+        
 
 def test_create_container_env(azure_ops):
     azure_ops.containerManagement.createContainerEnv("test", "test-env", "westeurope")

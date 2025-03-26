@@ -1,5 +1,6 @@
 from azure.mgmt.loganalytics import LogAnalyticsManagementClient
 from azure.mgmt.loganalytics.models import Workspace
+from azure.core.exceptions import ResourceNotFoundError
 
 class LogAnalyticsMgmt:
     def __init__(self, credential, AZURE_SUBSCRIPTION_ID):
@@ -25,6 +26,14 @@ class LogAnalyticsMgmt:
 
         except Exception as e:
             print(f"Workspace creation failed: {e}")
+
+    def getWorkSpace(self, rg_name, workspace_name):
+        try:
+            workspace = self.loanalytics_client.workspaces.get(rg_name, workspace_name)
+            return workspace 
+        except ResourceNotFoundError:
+            print(f"Workspace '{workspace_name}' does not exist.")
+
 
     def getSharedKeys(self, rg_name, workspace_name):
         shared_keys = self.loanalytics_client.shared_keys.get_shared_keys(
