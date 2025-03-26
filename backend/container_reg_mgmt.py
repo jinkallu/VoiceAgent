@@ -25,7 +25,6 @@ class ContainerRegistryMgmt:
             return registry
         except ResourceNotFoundError:
             print(f"❌ Container Registry '{registry_name}' does NOT exist.")
-            return False
 
 
     def createContainerRegistry(self, rg_name, registry_name, location):

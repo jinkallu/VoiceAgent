@@ -31,71 +31,120 @@ class AzureOps:
     def generate_random_alphanumeric(self, length):
         characters = string.ascii_letters + string.digits  # a-z, A-Z, 0-9
         return ''.join(random.choices(characters, k=length))
+    
+    def get_resource_names_by_type(self, newresources, target_type):
+        return [res["name"] for res in newresources if res["type"].lower() == target_type.lower()]
+
 
     def provision_resources(self, rg_name, location="westeurope"):
         # Create resource group
-        # Create Lognalytics workspace
+        resource_group = self.resourceManagement.getResourceGroup(rg_name)
+        if resource_group is None:
+            resource_group = self.resourceManagement.createResourceGroup(rg_name, location)
+            if resource_group is None:
+                # TODO: Manage resource_group creation error
+                pass
+        else:
+            print("resource_group already exists")
+
+        # Get already existing resources in teh resource group
+        resources = self.resourceManagement.list_resources_in_group(rg_name)
+        
+        workspace_names = self.get_resource_names_by_type(resources, 'Microsoft.OperationalInsights/workspaces')
         workspace_name = "test-loganalytics"
-        workspace = self.logAnalyticsMgmt.getWorkSpace(rg_name, workspace_name)
-        if workspace is None:
+        workspace = None
+        if len(workspace_names) > 0:
+            workspace_name = workspace_names[0]
+            print("Log analytics workspace already exists")
+            workspace = self.logAnalyticsMgmt.getWorkSpace(rg_name, workspace_name)
+            if workspace is None:
+                print("Error in Accessing Log analytics workspace")
+            else:
+                print("Accessed Log analytics workspace")
+        else: # No workspace exist
+            # Create Lognalytics workspace
             workspace = self.logAnalyticsMgmt.createWorkSpace(rg_name, workspace_name, location)
             if workspace is None:
                 # TODO: Manage workspace creation error
                 pass
-        else:
-            print("Log analytics workspace already exists")
+
+        
+        container_app_env_names = self.get_resource_names_by_type(resources, "Microsoft.App/managedEnvironments")    
         # Create Container Apps Env
         env_name = "test-env"
-        env = self.containerManagement.getContainerAppsEnv(rg_name, env_name)
-        if env is None:
+        env = None
+        if len(container_app_env_names) > 0:
+            env_name = container_app_env_names[0]
+            print("container apps env already exists")
+            env = self.containerManagement.getContainerAppsEnv(rg_name, env_name)
+            if env is None:
+                print("Error in Accessing container apps env")
+            else:
+                print("Accessed container apps env")
+        else:
             shared_key = self.logAnalyticsMgmt.getSharedKeys(rg_name, workspace_name)
             env = self.containerManagement.createContainerEnv(rg_name, env_name, location, workspace.customer_id, shared_key)
             if env is None:
                 # TODO: Manage container apps env creation error
                 pass
-        else:
-            print("container apps env already exists")
+     
         # Create blob storage
-        storage_account_name = "ppooeejdhgsfsd" # TODO: create random name, as it is global
-        storage_account = self.storageManagement.getStorageAccount(rg_name, storage_account_name)
-        if storage_account is None:
+        storage_account_names = self.get_resource_names_by_type(resources, "Microsoft.Storage/storageAccounts")
+        storage_account_name = "test" + self.generate_random_alphanumeric(5)
+        storage_account = None
+        if len(storage_account_names) > 0:
+            storage_account_name = storage_account_names[0]
+            print("storage account already exists")
+            storage_account = self.storageManagement.getStorageAccount(rg_name, storage_account_name)
+            if storage_account is None:
+                print("Error in Accessing storage account")
+            else:
+                print("Accessed storage account")
+        else:
             storage_account = self.storageManagement.createStorageAccount(rg_name, storage_account_name, location)
             if storage_account is None:
                 # TODO: Manage storage account creation error
                 pass
-        else:
-            print("storage account already exists")
 
         # container registry
+        registry_names = self.get_resource_names_by_type(resources, "Microsoft.ContainerRegistry/registries")
         registry_name = None
-        for i in range(5):
-            registry_name = "test" + self.generate_random_alphanumeric(5)
-            if self.containerRegistryMgmt.nameAvailable(registry_name):
-                break
-
         registry = None
-        if registry is None:
-            #registry = self.containerRegistryMgmt.createContainerRegistry(rg_name, registry_name, location)
+        if len(registry_names) > 0:
+            registry_name = registry_names[0]
+            print("container registry already exists")
+            registry = self.containerRegistryMgmt.getContainerRegistry(rg_name, registry_name)
+            if registry is None:
+                print("Error in Accessing container registry")
+            else:
+                print("Accessed container registry")
+        else:
+            for i in range(10):
+                registry_name = "test" + self.generate_random_alphanumeric(5)
+                if self.containerRegistryMgmt.nameAvailable(registry_name):
+                    break
+            registry = self.containerRegistryMgmt.createContainerRegistry(rg_name, registry_name, location)
             if registry is None:
                 # TODO: Manage container registry creation error
                 pass
-            else:
-                print("Created container Registry")
-        else:
-            print("container registry already exists")
-
 
         #Container App
+        app_names = self.get_resource_names_by_type(resources, "Microsoft.App/containerApps")
         app_name = "test-app"
-        app = self.containerManagement.getContainerApp(rg_name, app_name)
-        if app is None:
-            shared_key = self.logAnalyticsMgmt.getSharedKeys(rg_name, workspace_name)
-            env = self.containerManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, app_name, location)
-            if env is None:
+        app = None
+        if len(app_names) > 0:
+            app_name = app_names[0]
+            print("container app already exists")
+            app = self.containerManagement.getContainerApp(rg_name, app_name)
+            if app is None:
+                print("Error in Accessing app")
+            else:
+                print("Accessed app")
+        else:
+            app = self.containerManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, app_name, location)
+            if app is None:
                 # TODO: Manage container apps env creation error
                 pass
-        else:
-            print("container apps env already exists")
 
         # Create managed identity
         # AI services

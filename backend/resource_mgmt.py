@@ -59,6 +59,15 @@ class ResourceManagement:
         except:
             print("Error in creating rg")
 
+    def getResourceGroup(self, rg_name):
+        try:
+            # Get resource group details
+            resource_group = self.client.resource_groups.get(rg_name)
+            return resource_group
+        except:
+            return None
+
+
          
 
 
