@@ -5,6 +5,7 @@ from blob_ops import BlobOps
 from container_mgmt import ContainerManagement
 from loganalytics_mgmt import LogAnalyticsMgmt
 from container_reg_mgmt import ContainerRegistryMgmt
+from identity_management import IdentityManagement
 
 import random
 import string
@@ -27,6 +28,7 @@ class AzureOps:
         self.containerManagement = ContainerManagement(credential, self.AZURE_SUBSCRIPTION_ID)
         self.logAnalyticsMgmt = LogAnalyticsMgmt(credential, self.AZURE_SUBSCRIPTION_ID)
         self.containerRegistryMgmt = ContainerRegistryMgmt(credential, self.AZURE_SUBSCRIPTION_ID)
+        self.identityManagement = IdentityManagement(credential, self.AZURE_SUBSCRIPTION_ID)
 
     def generate_random_alphanumeric(self, length):
         characters = string.ascii_letters + string.digits  # a-z, A-Z, 0-9
@@ -147,6 +149,22 @@ class AzureOps:
                 pass
 
         # Create managed identity
+        identity_names = self.get_resource_names_by_type(resources, "Microsoft.ManagedIdentity/userAssignedIdentities")
+        identity_name = "test-identity"
+        identity = None
+        if len(identity_names) > 0:
+            identity_name = identity_names[0]
+            print("Identity already exists")
+            identity = self.identityManagement.getManagedIdentity(rg_name, identity_name)
+            if identity is None:
+                print("Error in Accessing identity")
+            else:
+                print("Accessed identity")
+        else:
+            identity = self.identityManagement.createManagedIdentity(rg_name, identity_name, location)
+            if identity is None:
+                # TODO: Manage identity creation error
+                pass
         # AI services
         
 

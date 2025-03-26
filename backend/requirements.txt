@@ -16,3 +16,4 @@ azure-mgmt-storage
 azure-mgmt-appcontainers
 azure-mgmt-loganalytics
 azure-mgmt-containerregistry
+azure-mgmt-msi
