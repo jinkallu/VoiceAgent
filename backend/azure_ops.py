@@ -6,6 +6,7 @@ from container_mgmt import ContainerManagement
 from loganalytics_mgmt import LogAnalyticsMgmt
 from container_reg_mgmt import ContainerRegistryMgmt
 from identity_management import IdentityManagement
+from cogni_services_mgmt import CognitiveServicesMgmt
 
 import random
 import string
@@ -29,6 +30,7 @@ class AzureOps:
         self.logAnalyticsMgmt = LogAnalyticsMgmt(credential, self.AZURE_SUBSCRIPTION_ID)
         self.containerRegistryMgmt = ContainerRegistryMgmt(credential, self.AZURE_SUBSCRIPTION_ID)
         self.identityManagement = IdentityManagement(credential, self.AZURE_SUBSCRIPTION_ID)
+        self.cognitiveServicesMgmt = CognitiveServicesMgmt(credential, self.AZURE_SUBSCRIPTION_ID)
 
     def generate_random_alphanumeric(self, length):
         characters = string.ascii_letters + string.digits  # a-z, A-Z, 0-9
@@ -38,7 +40,7 @@ class AzureOps:
         return [res["name"] for res in newresources if res["type"].lower() == target_type.lower()]
 
 
-    def provision_resources(self, rg_name, location="westeurope"):
+    def provision_resources(self, rg_name, location="eastus 2"):
         # Create resource group
         resource_group = self.resourceManagement.getResourceGroup(rg_name)
         if resource_group is None:
@@ -166,10 +168,39 @@ class AzureOps:
                 # TODO: Manage identity creation error
                 pass
         # AI services
+        aiservice_names =  self.get_resource_names_by_type(resources, "Microsoft.CognitiveServices/accounts")
+        aiservice_name = "testOAI1"
+        aiservice = None
+        if len(aiservice_names) > 0:
+            aiservice_name = aiservice_names[0]
+            print(f"aiservice {aiservice_name} already exists")
+            aiservice = self.cognitiveServicesMgmt.getAIService(rg_name, aiservice_name)
+            if aiservice is None:
+                print("Error in Accessing aiservice")
+            else:
+                print("Accessed aiservice")
+        else:
+            aiservice = self.cognitiveServicesMgmt.createServiceResource(rg_name, aiservice_name, location)
+            if aiservice is None:
+                # TODO: Manage identity creation error
+                pass
+
+        # AI Deployments
+        deployment_name = "gpt-4o"
+        deployment = self.cognitiveServicesMgmt.getDeployment(rg_name, aiservice_name, deployment_name)
+        if deployment is None:
+            model_name = "gpt-4o"
+            version = "2024-11-20"
+            deployment = self.cognitiveServicesMgmt.createDeployment(rg_name, aiservice_name, location, deployment_name, model_name, version)
+            if deployment is None:
+                # TODO: Manage deployment creation error
+                pass
+
+        
         
 
 def test_create_container_env(azure_ops):
-    azure_ops.containerManagement.createContainerEnv("test", "test-env", "westeurope")
+    azure_ops.containerManagement.createContainerEnv("test", "test-env", "eastus 2")
 
 
 
