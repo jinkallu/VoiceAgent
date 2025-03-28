@@ -20,6 +20,7 @@ function Sidebar() {
   const { t } = useTranslation();
   const resourceGroups = useAdminStore((state) => state.resourceGroups);
   const products = useAdminStore((state) => state.products);
+
   const setProducts = useAdminStore((state) => state.setProducts);
   const token = useAdminStore((state) => state.token);
 
@@ -33,20 +34,22 @@ function Sidebar() {
     openSidebarHandler();
     loginCtx.toggleLogin();
   }
-  async function getProducts(token: string, resouceGroupName: string[]) {
+  async function getProducts(token: string) {
     console.log("resource groups", resourceGroups);
-    const products = await getProductsOfResourceGroup(token, resouceGroupName);
-    setProducts(products || []);
-    console.log(products);
+    const data = await getProductsOfResourceGroup(token);
+    if (data?.status === 200) {
+      setProducts(data?.products || []);
+      console.log("products set", data);
+    }
   }
 
   useEffect(() => {
     console.log("resource groups", resourceGroups);
 
-    if (resourceGroups.length > 0 && token) {
-      getProducts(token, resourceGroups[0]);
+    if (token) {
+      getProducts(token);
     }
-  }, [resourceGroups.length, token]);
+  }, [token]);
 
   useEffect(() => {
     const curPath = window.location.pathname.split("/")[1];
@@ -65,10 +68,20 @@ function Sidebar() {
         <img src={images.logo} alt="Tralpine" />
       </div>
       <div className={classes.sidebar__menu}>
-        {products.length > 0 ? (
+        <Link
+          to={`products`}
+          className={classes.sidebar__menu__item}
+          onClick={openSidebarHandler}
+        >
+          <div className={classes.sidebar__menu__item__icon}>
+            <Icon icon={""} />
+          </div>
+          <div className={classes.sidebar__menu__item__txt}>Products</div>
+        </Link>
+        {/* {products.length > 0 ? (
           products?.map((item: string, index: number) => (
             <Link
-              to={item}
+              to={`products/${item}`}
               key={`nav-${index}`}
               className={`${classes.sidebar__menu__item} ${
                 activeIndex === index && classes.active
@@ -83,7 +96,7 @@ function Sidebar() {
           ))
         ) : (
           <h1>No Products to display</h1>
-        )}
+        )} */}
       </div>
 
       <div className={[classes.sidebar__menu, classes.logout].join("")}>

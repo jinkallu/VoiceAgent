@@ -1,7 +1,7 @@
 export const createUserSlice = (set) => ({
-  resourceGroups: [],
+  resourceGroup: null,
   userName: "",
   token: null,
   setToken: (token) => set(() => ({ token })),
-  setResourceGroups: (rg) => set(() => ({ resourceGroups: rg })),
+  setResourceGroup: (rg) => set(() => ({ resourceGroup: rg })),
 });

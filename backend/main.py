@@ -12,6 +12,7 @@ from azure_ops import AzureOps
 import os
 from process_pdf import ProcessPDF
 import base64
+import json
 
 
 azureOps = AzureOps()
@@ -64,10 +65,10 @@ class ProductImgDataRequest(BaseModel):
     img_url: str  # Expected data key (resource group name)
 
 # Helper function to create a JWT token
-def create_access_token(username: str):
+def create_access_token(data):
     expires_delta = datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     expire = datetime.datetime.now(datetime.timezone.utc) + expires_delta
-    to_encode = {"sub": username, "exp": expire}
+    to_encode = {"sub": json.dumps(data), "exp": expire}
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
@@ -92,6 +93,7 @@ def register(user_data: UserRegister, db: Session = Depends(get_db)):
 
 @app.post("/login/")
 def login(user_data: UserLogin,):
+    print('login called',user_data)
     # user = db.query(User).filter(User.username == user_data.username).first()
     # if not user or not pwd_context.verify(user_data.password, user.hashed_password):
     #     raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -103,17 +105,40 @@ def login(user_data: UserLogin,):
             azureOps.blobOps.setContainerClient(os.getenv("AZURE_ADMIN_CONTAINER_NAME"))
 
             userData=azureOps.blobOps.getStorageMappingAsJson(os.getenv("AZURE_ADMIN_BLOB_NAME"))
-            user={}
             if(len(userData)>0):
                 for item in userData:
                     if(item['username']==user_data.username and item['password']==user_data.password):
                         user=item
-                        access_token = create_access_token(user_data.username)
-                        return {"access_token": access_token,"resource_groups":item.get('resourceGroups') or []}
+                        access_token = create_access_token({"username":user_data.username,"resourceGroups":item["resourceGroups"] or []})
+                        return {"access_token": access_token}
+
+    except Exception as e:
+        print(e)
+        return None  
+
+@app.get("/loadresourcegroups/")
+def loadResourceGroups(authorization: str = Header(...)):
+    payload = authorised(authorization)
+    username = payload.get("sub")
+   
+    try:
+        blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(os.getenv("AZURE_ADMIN_RESOURCE_GROUP"))
+        if(len(blob_storage)>0):
+            storageName=blob_storage[0]["name"]
+            azureOps.blobOps.setBlobServiceClient(storage_name=storageName)
+            azureOps.blobOps.setContainerClient(os.getenv("AZURE_ADMIN_CONTAINER_NAME"))
+
+            userData=azureOps.blobOps.getStorageMappingAsJson(os.getenv("AZURE_ADMIN_BLOB_NAME"))
+            user={}
+            if(len(userData)>0):
+                for item in userData:
+                    if(item['username']==username):
+                        return {"resource_groups":item.get('resourceGroups') or []}
 
     except Exception as e:
         print(e)
         return None    
+  
 
     
 def authorised(authorization):
@@ -121,6 +146,7 @@ def authorised(authorization):
         # Expecting header: "Bearer <token>"
         token = authorization.split(" ")[1]
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print("payload", payload)
         return payload
     except JWTError as e:
         print(e)
@@ -131,17 +157,15 @@ def authorised(authorization):
     
 
 
-@app.get("/resourcegroups/")
-def protected_route(authorization: str = Header(...)):
-    payload = authorised(authorization)
-    username = payload.get("sub")
-    resource_groups  = [azureOps.resourceManagement.list_resource_groups()[1]] # TODO: proper one
-    return {"message": f"Welcome, {username}!", "resource_groups": resource_groups}
 
-@app.post("/products/")
-def products(request_data: ProductRequest, authorization: str = Header(...)):
+@app.get("/products/")
+def products( authorization: str = Header(...)):
     payload = authorised(authorization)
-    blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(request_data.rg_name)
+    userData = payload.get("sub")
+    print("....userdata",userData)
+    tokenData=json.loads(userData)
+    
+    blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0])
     print(blob_storage[0]["name"])
     if len(blob_storage) == 0:
         return
@@ -155,20 +179,41 @@ def products(request_data: ProductRequest, authorization: str = Header(...)):
         if(nameArray[0]=="prd"):
             prdContainers.append("-".join(nameArray[1:]))
             
-    print("containers",prdContainers)
-
-   
+    print("containers",prdContainers)  
 
     return {"products": prdContainers}
 
 @app.post("/product_data/")
 def product_data(request_data: ProductDataRequest, authorization: str = Header(...)):
-    payload = authorised(authorization)
-    product_data = azureOps.blobOps.getProductAsJson(request_data.product_name)
-    #print(azureOps.blobOps.createContainerIfNotExists("test"))
-    
+    try:
+        print("product data called")
+        payload = authorised(authorization)
+        print("api called")
+        userData = payload.get("sub")
+        print("....userdata",userData)
+        tokenData=json.loads(userData)
+        
+        blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0])
+        print(blob_storage[0]["name"])
+        if len(blob_storage) == 0:
+            return
+        
+        azureOps.blobOps.setBlobServiceClient(storage_name=blob_storage[0]["name"])
+        container_name=f"prd-{request_data.product_name}"
+        print("container name",container_name)
+        azureOps.blobOps.setContainerClient(container_name=container_name)
 
-    return {"product_data": product_data}
+
+        product_data = azureOps.blobOps.getProductAsJson(os.getenv("PRODUCT_DATA_FILE_NAME"))
+        print(product_data)
+        #print(azureOps.blobOps.createContainerIfNotExists("test"))
+        
+
+        return {"product_data": product_data,"status":200}
+    except Exception as e:
+        print(e)
+        return {"product_data": [],"status":400}
+
 
 @app.post("/upload/")
 async def upload(file: UploadFile = File(...), authorization: str = Header(...)):

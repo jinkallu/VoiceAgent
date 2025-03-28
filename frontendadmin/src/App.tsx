@@ -1,4 +1,4 @@
-import React, { Suspense, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import MainLayout from "./layout/MainLayout";
@@ -8,8 +8,6 @@ import "./scss/App.scss";
 import { useAdminStore } from "./store/zustand/store";
 
 const Dashboard = React.lazy(() => import("./pages/Dashboard"));
-const Customers = React.lazy(() => import("./pages/Customers"));
-const CustomerEdit = React.lazy(() => import("./pages/CustomerEdit"));
 const Products = React.lazy(() => import("./pages/Products"));
 const ProductEdit = React.lazy(() => import("./pages/ProductEdit"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
@@ -30,8 +28,6 @@ function App() {
               element={token ? <MainLayout /> : <Navigate to="/login" />}
             >
               <Route index element={<Dashboard />} />
-              <Route path="/customers" element={<Customers />} />
-              <Route path="/customers/:customerId" element={<CustomerEdit />} />
               <Route path="/products" element={<Products />} />
               <Route path="/products/:productId" element={<ProductEdit />} />
               <Route path="/orders" element={<BlankPage />} />

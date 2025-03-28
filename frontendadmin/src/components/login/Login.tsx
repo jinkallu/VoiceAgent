@@ -1,4 +1,4 @@
-import React, { useContext, useRef } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 
 import LoginContext from "../../store/loginContext";
 import langContextObj from "../../store/langContext";
@@ -19,7 +19,6 @@ function LoginBox() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const setToken = useAdminStore((state) => state.setToken);
-  const setResourceGroups = useAdminStore((state) => state.setResourceGroups);
 
   async function loginHandler(e: React.FormEvent) {
     e.preventDefault();
@@ -33,9 +32,11 @@ function LoginBox() {
     });
 
     const data = await response.json();
+    console.log(data);
     if (response.ok && data?.access_token) {
+      console.log(data);
       setToken(data.access_token);
-      setResourceGroups(data?.resource_groups || []);
+      // setResourceGroups(data?.resource_groups || []);
       localStorage.setItem("token", data.access_token);
       loginCtx.toggleLogin();
       navigate("/");
@@ -47,6 +48,7 @@ function LoginBox() {
       );
     }
   }
+
   return (
     <div
       className={`${classes.container} ${

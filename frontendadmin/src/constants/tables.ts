@@ -1,21 +1,12 @@
-export const customersHeader = [
-  "ID",
-  "userName",
-  "email",
-  "phoneNumber",
-  "totalOrders",
-  "totalSpending",
-  "location",
-  "actions",
-];
+export const customersHeader = ["ID", "Product", "actions"];
 export const customers = [
   {
     ID: 0,
     avatar:
       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80",
-    userName: "Zahra Mirzaei",
-    email: "zahra_mirzaei@gmail.com",
-    phoneNumber: "+98 918 123 45 67",
+    userName: "Customer 1",
+    email: "customer1@gmail.com",
+    phoneNumber: "",
     totalOrders: 804,
     totalSpend: "$120.00",
     location: "UK",
@@ -132,14 +123,7 @@ export const customers = [
   },
 ];
 
-export const productsHeader = [
-  "ID",
-  "product",
-  "inventory",
-  "price",
-  "category",
-  "actions",
-];
+export const productsHeader = ["ID", "product", "actions"];
 export const products = [
   {
     ID: 0,
