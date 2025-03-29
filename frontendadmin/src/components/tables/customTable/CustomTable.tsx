@@ -91,13 +91,6 @@ const CustomTable: React.FC<Props> = (props) => {
   return (
     <>
       {/* modal for delete customer and product case*/}
-      {showModal ? (
-        <Modal
-          title={t("deleteCustomer")}
-          message={`${t("modalMessage")}`}
-          onConfirm={showModalHandler}
-        />
-      ) : null}
 
       <div className={classes.container}>
         <Card>

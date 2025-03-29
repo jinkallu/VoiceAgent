@@ -10,6 +10,10 @@ import { useAdminStore } from "../store/zustand/store";
 import { getDataFromProductName } from "../services/apiService";
 import ProblemList from "../components/problemList";
 import { ITSList } from "../interfaces/generic";
+import { Icon } from "@iconify/react";
+import Button from "../components/UI/button/Button";
+import Modal from "../components/UI/modal/Modal";
+import NewProblem from "../components/newProblem";
 
 const url =
   "https://admin-panel-79c71-default-rtdb.europe-west1.firebasedatabase.app/products";
@@ -21,7 +25,9 @@ function ProductEdit() {
   const token = useAdminStore((state) => state.token);
   const location = useLocation();
   const [productData, sestProductData] = useState<ITSList[] | []>([]);
-  console.log(location);
+  const [productName, sestProductName] = useState<string>();
+  const [editable, setEditable] = useState<boolean>(false);
+  const [newProblem, setNewProblem] = useState<boolean>(false);
 
   let productInfo: IProductsTable = products.filter(
     (item) => item.ID.toString() === productId
@@ -47,23 +53,57 @@ function ProductEdit() {
 
   async function loadDataFromProductName(token: string, product_name: string) {
     const data = await getDataFromProductName(token, product_name);
+    console.log("....", data);
     if (data?.status === 200) {
-      sestProductData(data?.productData?.data || []);
+      sestProductData(data?.productData || []);
     }
   }
 
   useEffect(() => {
     const locationArray = location?.pathname.split("/");
     const productName = locationArray[locationArray.length - 1];
+
+    sestProductName(productName);
     loadDataFromProductName(token, productName);
   }, [location, token]);
   return (
-    <section>
-      <h2 className="title">{`${t("editProduct")}-${
-        currentProduct?.product
-      }`}</h2>
-      {productData.length > 0 && (
-        <ProblemList problemList={productData}></ProblemList>
+    <section style={{ maxHeight: "100%", overflowY: "auto" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-around",
+          alignItems: "center",
+        }}
+      >
+        <h2 className="title">{`${editable ? t("editProduct-") : ""}${
+          currentProduct?.product
+        }`}</h2>
+
+        <Button onClick={() => setEditable((prev) => !prev)}>
+          {`${editable ? "Cancel Edit" : "Edit"}`}
+        </Button>
+      </div>
+      {newProblem && (
+        <Modal
+          title="New Proble"
+          onConfirm={() => {
+            setNewProblem((prev) => !prev);
+          }}
+        >
+          <NewProblem></NewProblem>
+        </Modal>
+      )}
+      {editable && (
+        <div>
+          <Button onClick={() => setNewProblem(true)}>New Problem</Button>
+        </div>
+      )}
+      {productData.length > 0 && productName && (
+        <ProblemList
+          editable={editable}
+          problemList={productData}
+          productName={productName}
+        ></ProblemList>
       )}
     </section>
   );

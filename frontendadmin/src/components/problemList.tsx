@@ -2,13 +2,24 @@ import { ITSList } from "../interfaces/generic";
 import ProblemItem from "./problemItem";
 interface props {
   problemList: ITSList[];
+  productName: string;
+  editable: boolean;
 }
 
-function ProblemList({ problemList }: props) {
+function ProblemList({ problemList, productName, editable }: props) {
   return (
-    <div>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       {problemList?.map((tsStep: ITSList) => (
-        <ProblemItem tsStep={tsStep}></ProblemItem>
+        <ProblemItem
+          key={tsStep.problem}
+          tsStep={tsStep}
+          productName={productName}
+        ></ProblemItem>
       ))}
     </div>
   );

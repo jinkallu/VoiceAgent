@@ -37,6 +37,7 @@ class BlobOps:
         try:
             # Get a blob client to interact with the specific blob
             blob_client = self.container_client.get_blob_client(blob_name)
+            print(blob_client.url)
 
             # Download the blob's content
             blob_data = blob_client.download_blob()
@@ -56,9 +57,9 @@ class BlobOps:
         json_str = self.getStorageMapping(mapping_blob_name)
         return json.loads(json_str)
     
-    def getProductAsJson(self, product_blob_name):
-        json_str = self.getBlobData(product_blob_name)
-        return json.loads(json_str)
+    def getProductData(self, product_blob_name):
+        data = self.getBlobData(product_blob_name)
+        return data
     
     def createContainerIfNotExists(self, container_name):
         container_client = self.blob_service_client.get_container_client(container_name)

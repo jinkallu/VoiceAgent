@@ -19,10 +19,10 @@ function Sidebar() {
   const loginCtx = useContext(LoginContext);
   const { t } = useTranslation();
   const resourceGroups = useAdminStore((state) => state.resourceGroups);
-  const products = useAdminStore((state) => state.products);
 
   const setProducts = useAdminStore((state) => state.setProducts);
   const token = useAdminStore((state) => state.token);
+  const setToken = useAdminStore((state) => state.setToken);
 
   function openSidebarHandler() {
     //for width>768(tablet size) if sidebar was open in width<768 was opened too.
@@ -36,7 +36,11 @@ function Sidebar() {
   }
   async function getProducts(token: string) {
     console.log("resource groups", resourceGroups);
-    const data = await getProductsOfResourceGroup(token);
+    const data = await getProductsOfResourceGroup({ token });
+    if (data?.status === 401) {
+      setToken(null);
+    }
+
     if (data?.status === 200) {
       setProducts(data?.products || []);
       console.log("products set", data);
@@ -44,8 +48,6 @@ function Sidebar() {
   }
 
   useEffect(() => {
-    console.log("resource groups", resourceGroups);
-
     if (token) {
       getProducts(token);
     }

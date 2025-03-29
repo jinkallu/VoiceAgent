@@ -1,4 +1,5 @@
 from fastapi import FastAPI, File, UploadFile, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Header
 from sqlalchemy.orm import Session
@@ -13,6 +14,8 @@ import os
 from process_pdf import ProcessPDF
 import base64
 import json
+from PIL import Image
+import io
 
 
 azureOps = AzureOps()
@@ -60,6 +63,12 @@ class ProductRequest(BaseModel):
 
 class ProductDataRequest(BaseModel):
     product_name: str  # Expected data key (resource group name)
+
+class ProductResourceRequest(BaseModel):
+    product_name: str  # Expected data key (resource group name)
+    file_name:str
+    type:str
+
 
 class ProductImgDataRequest(BaseModel):
     img_url: str  # Expected data key (resource group name)
@@ -186,33 +195,65 @@ def products( authorization: str = Header(...)):
 @app.post("/product_data/")
 def product_data(request_data: ProductDataRequest, authorization: str = Header(...)):
     try:
-        print("product data called")
         payload = authorised(authorization)
-        print("api called")
         userData = payload.get("sub")
-        print("....userdata",userData)
         tokenData=json.loads(userData)
         
         blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0])
-        print(blob_storage[0]["name"])
         if len(blob_storage) == 0:
             return
         
         azureOps.blobOps.setBlobServiceClient(storage_name=blob_storage[0]["name"])
         container_name=f"prd-{request_data.product_name}"
-        print("container name",container_name)
         azureOps.blobOps.setContainerClient(container_name=container_name)
 
 
-        product_data = azureOps.blobOps.getProductAsJson(os.getenv("PRODUCT_DATA_FILE_NAME"))
-        print(product_data)
+        product_data = azureOps.blobOps.getProductData(os.getenv("PRODUCT_DATA_FILE_NAME"))
         #print(azureOps.blobOps.createContainerIfNotExists("test"))
         
 
-        return {"product_data": product_data,"status":200}
+        return {"product_data":json.loads(product_data),"status":200}
     except Exception as e:
         print(e)
         return {"product_data": [],"status":400}
+    
+@app.post("/product_resource/")
+def product_data(request_data: ProductResourceRequest, authorization: str = Header(...)):
+    try:
+        payload = authorised(authorization)
+        userData = payload.get("sub")
+        tokenData=json.loads(userData)
+        
+        blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0])
+        if len(blob_storage) == 0:
+            return
+        
+        azureOps.blobOps.setBlobServiceClient(storage_name=blob_storage[0]["name"])
+        container_name=f"prd-{request_data.product_name}"
+        azureOps.blobOps.setContainerClient(container_name=container_name)
+        folder_prefix=""
+        if(request_data.type=="image"):
+            folder_prefix="images"
+
+
+
+
+        image_data = azureOps.blobOps.getProductData(f"{folder_prefix}/{request_data.file_name}")
+        image=Image.open(io.BytesIO(image_data))
+        #print(azureOps.blobOps.createContainerIfNotExists("test"))
+        # create a thumbnail image
+        # image.thumbnail((100, 100))
+        imgio = io.BytesIO()
+        image.save(imgio, 'JPEG')
+        imgio.seek(0)
+        return StreamingResponse(content=imgio, media_type="image/jpeg")
+        
+
+        # return send_file(io.BytesIO(obj.logo.read()),download_name=request_data.file_name,mimetype='image/jpeg' )
+    except Exception as e:
+        print(e)
+        return {"product_resource": None,"status":400}
+
 
 
 @app.post("/upload/")

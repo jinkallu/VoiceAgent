@@ -19,7 +19,6 @@ const Backdrop: React.FC<IBackdrop> = (props) => {
 
 interface IModal {
   title: string;
-  message: string;
   onConfirm: () => void;
 }
 
@@ -32,9 +31,7 @@ const ModalOverlay: React.FC<IModal> = (props) => {
         <header className={classes.header}>
           <h3>{props.title}</h3>
         </header>
-        <div className={classes.content}>
-          <p>{props.message}</p>
-        </div>
+        <div className={classes.content}>{props.children}</div>
         <footer className={classes.actions}>
           <Button outline={true} onClick={props.onConfirm}>
             {t("cancel")}
@@ -58,11 +55,9 @@ const Modal: React.FC<IModal> = (props) => {
         backdropRoot
       )}
       {ReactDom.createPortal(
-        <ModalOverlay
-          title={props.title}
-          message={props.message}
-          onConfirm={props.onConfirm}
-        />,
+        <ModalOverlay title={props.title} onConfirm={props.onConfirm}>
+          {props.children}
+        </ModalOverlay>,
         modalOverlay
       )}
     </>

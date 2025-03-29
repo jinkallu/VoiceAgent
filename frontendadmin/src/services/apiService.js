@@ -13,7 +13,7 @@ const getResourceGroups = async (token) => {
   }
 };
 
-const getProductsOfResourceGroup = async (token) => {
+const getProductsOfResourceGroup = async ({ token }) => {
   try {
     const response = await fetch("http://127.0.0.1:8000/products/", {
       headers: {
@@ -67,8 +67,37 @@ const getDataFromProductName = async (token, product_name) => {
       return { status: response.status, message: "Unauthorized" };
     } else {
       const data = await response.json();
-      console.log(data);
+      console.log("................", data);
       return { status: 200, productData: data?.product_data || [] };
+    }
+  } catch (e) {
+    console.log(e);
+    return;
+  }
+};
+
+const getProductResource = async (token, product_name, resource) => {
+  console.log(resource);
+  try {
+    const response = await fetch("http://127.0.0.1:8000/product_resource/", {
+      method: "POST",
+      body: JSON.stringify({
+        product_name,
+        type: resource.type,
+        file_name: resource.fileName,
+      }),
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json", // Ensure you're sending JSON
+      },
+    });
+    if (response.status !== 200) {
+      return { status: response.status, message: "Unauthorized" };
+    } else {
+      const imageBlog = await response.blob();
+      const imageURL = URL.createObjectURL(imageBlog);
+      console.log(imageURL);
+      return { status: 200, imageURL };
     }
   } catch (e) {
     console.log(e);
@@ -81,4 +110,5 @@ export {
   getProductsOfResourceGroup,
   getResouceGroupFromUsername,
   getDataFromProductName,
+  getProductResource,
 };

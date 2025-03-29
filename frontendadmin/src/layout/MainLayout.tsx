@@ -13,14 +13,20 @@ import { getResouceGroupFromUsername } from "../services/apiService";
 function MainLayout() {
   const sidebarCtx = useContext(SidebarContext);
   const token = useAdminStore((state) => state.token);
-  const setResourceGroups = useAdminStore((state) => state.setResourceGroups);
-  const setToken = useAdminStore((state) => state.setToken);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (document.body.classList.contains("sidebar__open"))
       document.body.classList.remove("sidebar__open");
   }, []);
+
+  useEffect(() => {
+    console.log("useeffect called", token);
+    if (!token) {
+      navigate("/login");
+      console.log("navigating");
+    }
+  }, [token]);
 
   // async function loadResourceGroups(token: string) {
   //   const rgs = await getResouceGroupFromUsername(token);
