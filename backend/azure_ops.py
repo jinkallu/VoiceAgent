@@ -191,7 +191,20 @@ class AzureOps:
         if deployment is None:
             model_name = "gpt-4o"
             version = "2024-11-20"
-            deployment = self.cognitiveServicesMgmt.createDeployment(rg_name, aiservice_name, location, deployment_name, model_name, version)
+            capacity = 20
+            deployment = self.cognitiveServicesMgmt.createDeployment(rg_name, aiservice_name, location, deployment_name, model_name, version, capacity)
+            if deployment is None:
+                # TODO: Manage deployment creation error
+                pass
+
+        # AI Deployments
+        deployment_name = "gpt-4o-mini"
+        deployment = self.cognitiveServicesMgmt.getDeployment(rg_name, aiservice_name, deployment_name)
+        if deployment is None:
+            model_name = "gpt-4o-mini"
+            version = "2024-07-18"
+            capacity = 20
+            deployment = self.cognitiveServicesMgmt.createDeployment(rg_name, aiservice_name, location, deployment_name, model_name, version, capacity)
             if deployment is None:
                 # TODO: Manage deployment creation error
                 pass

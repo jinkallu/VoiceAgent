@@ -35,12 +35,12 @@ class CognitiveServicesMgmt:
             print(f"No deployment {deployment_name}", e)
 
 
-    def createDeployment(self, rg_name, account_name, location, deployment_name, model_name, version):
+    def createDeployment(self, rg_name, account_name, location, deployment_name, model_name, version, capacity=10):
         # Define the deployment configuration
         deployment = Deployment(
             sku=Sku(
                     name="GlobalStandard",
-                    capacity=440, # 440 000 Tokens per minute, 2640 request per minute
+                    capacity=capacity, # 440 000 Tokens per minute, 2640 request per minute
                     
                 ),  # You can adjust the SKU as needed
             properties=DeploymentProperties(
