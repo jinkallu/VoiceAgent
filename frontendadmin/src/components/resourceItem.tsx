@@ -6,7 +6,7 @@ import LoadingSpinner from "./UI/loadingSpinner/LoadingSpinner";
 
 interface props {
   productName: string;
-  resource: IResource;
+  resource: IResource | null;
   expanded: boolean;
 }
 
@@ -14,7 +14,7 @@ function ResourceItem({ resource, productName, expanded }: props) {
   async function getResource(
     token: string,
     productName: string,
-    resource: IResource
+    resource: IResource | null
   ) {
     setImageLoading(true);
     const res = await getProductResource(token, productName, resource);
@@ -22,7 +22,6 @@ function ResourceItem({ resource, productName, expanded }: props) {
       setImageURL(res?.imageURL);
     }
     setImageLoading(false);
-    console.log(res);
   }
   const [imageURL, setImageURL] = useState<string>();
   const [imageLoading, setImageLoading] = useState<boolean>(false);
@@ -37,7 +36,7 @@ function ResourceItem({ resource, productName, expanded }: props) {
     <img
       style={{ width: "100px", height: "100px" }}
       src={imageURL}
-      alt={resource.fileName}
+      alt={resource?.fileName}
     ></img>
   );
 }

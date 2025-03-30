@@ -10,7 +10,6 @@ import classes from "./CustomTable.module.scss";
 import { useAdminStore } from "../../../store/zustand/store";
 
 const CustomTable: React.FC<Props> = (props) => {
-  console.log(props);
   const [showModal, setShowModal] = useState(false);
   const setCurrentProduct = useAdminStore((state) => state.setCurrentProduct);
   function showModalHandler() {

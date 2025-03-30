@@ -69,7 +69,9 @@ class ProductResourceRequest(BaseModel):
     file_name:str
     type:str
 
-
+class ProductData(BaseModel):
+    product_name:str
+    data:list
 class ProductImgDataRequest(BaseModel):
     img_url: str  # Expected data key (resource group name)
 
@@ -244,7 +246,7 @@ def product_data(request_data: ProductResourceRequest, authorization: str = Head
         # create a thumbnail image
         # image.thumbnail((100, 100))
         imgio = io.BytesIO()
-        image.save(imgio, 'JPEG')
+        image.save(imgio, 'JPEG') 
         imgio.seek(0)
         return StreamingResponse(content=imgio, media_type="image/jpeg")
         
@@ -254,6 +256,26 @@ def product_data(request_data: ProductResourceRequest, authorization: str = Head
         print(e)
         return {"product_resource": None,"status":400}
 
+
+@app.post("/upload_productdata/")
+async def uploadProductdata(request_data:ProductData, authorization: str = Header(...)):
+    payload = authorised(authorization)
+    # Check if it's a PDFuserData = payload.get("sub")
+    
+    payload = authorised(authorization)
+    userData = payload.get("sub")
+    tokenData=json.loads(userData)
+        
+    blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0])
+    if len(blob_storage) == 0:
+        return
+        
+    azureOps.blobOps.setBlobServiceClient(storage_name=blob_storage[0]["name"])
+    container_name=f"prd-{request_data.product_name}"
+    azureOps.blobOps.setContainerClient(container_name=container_name)
+       
+
+    azureOps.blobOps.createOrReplaceBlobFromPyDict(os.getenv("PRODUCT_DATA_FILE_NAME"), request_data.data)
 
 
 @app.post("/upload/")

@@ -16,8 +16,6 @@ function ProblemItem({ tsStep, productName }: props) {
         flexDirection: "column",
         padding: "5px",
         width: "100%",
-        boxShadow: "2px 2px gray",
-        borderLeft: "2px solid lightblue",
       }}
     >
       <div style={{ display: "flex", gap: "5px", marginBottom: "5px" }}>
@@ -25,7 +23,15 @@ function ProblemItem({ tsStep, productName }: props) {
           onClick={() => setExpanded((prev) => !prev)}
           icon={`${expanded ? "ep:minus" : "ep:plus"}`}
         ></Icon>
-        <div style={{ display: "flex", gap: "5px" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "5px",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%",
+          }}
+        >
           <h4>{tsStep.problem}</h4>
           <div
             style={{

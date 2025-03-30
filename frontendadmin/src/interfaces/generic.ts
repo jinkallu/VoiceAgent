@@ -5,7 +5,7 @@ export interface ITSList {
 
 export interface IStep {
   step: string;
-  resource: IResource;
+  resource: IResource | null;
 }
 export interface IResource {
   type: string;

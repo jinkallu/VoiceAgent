@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import classes from "./Modal.module.scss";
 import Card from "../card/Card";
 import Button from "../button/Button";
+import { Icon } from "@iconify/react";
 
 interface IBackdrop {
   onConfirm: () => void;
@@ -30,16 +31,17 @@ const ModalOverlay: React.FC<IModal> = (props) => {
       <div className={classes.modal}>
         <header className={classes.header}>
           <h3>{props.title}</h3>
+          <Icon onClick={props.onConfirm} icon="material-symbols:close"></Icon>
         </header>
         <div className={classes.content}>{props.children}</div>
-        <footer className={classes.actions}>
+        {/* <footer className={classes.actions}>
           <Button outline={true} onClick={props.onConfirm}>
             {t("cancel")}
           </Button>
           <button className={classes.delete} onClick={props.onConfirm}>
             {t("delete")}
           </button>
-        </footer>
+        </footer> */}
       </div>
     </Card>
   );

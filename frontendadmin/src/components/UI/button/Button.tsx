@@ -6,6 +6,7 @@ interface Props {
   type?: "button" | "submit";
   onClick?: (e: React.MouseEvent<HTMLElement>) => void;
   outline?: boolean;
+  disabled?: boolean;
 }
 const Button: React.FC<Props> = (props) => {
   return (
@@ -13,6 +14,7 @@ const Button: React.FC<Props> = (props) => {
       className={`${classes.btn} ${
         props.outline ? classes.outline : classes.button
       } `}
+      disabled={props.disabled}
       type={props.type || "button"}
       onClick={props.onClick}
     >
