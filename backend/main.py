@@ -58,6 +58,9 @@ class UserRegister(BaseModel):
 class UserLogin(BaseModel):
     username: str
     password: str
+
+class Assistant(BaseModel):
+    name: str
 class ProductRequest(BaseModel):
     rg_name: str  # Expected data key (resource group name)
 
@@ -115,6 +118,7 @@ def register(user_data: UserRegister):
 
     # Hash the password
     hashed_password = pwd_context.hash(user_data.password)
+    
     user ={
         "username":user_data.username, 
         "hashed_password":hashed_password,
@@ -126,10 +130,10 @@ def register(user_data: UserRegister):
         res=azureOps.blobOps.createOrReplaceBlobFromPyDict(os.getenv("AZURE_ADMIN_BLOB_NAME"), userData)
         print(res)
     except Exception as e:
-        raise HTTPException(status_code=400, detail="Could not register the user")
+        raise HTTPException(status_code=400, detail=f"Could not register the user")
 
 
-    return {"message": "User registered successfully", "res": res}
+    return {"message": "User registered successfully"}
 
 
 @app.post("/login/")
@@ -190,7 +194,12 @@ def authorised(authorization):
         else:
             raise HTTPException(status_code=401, detail="Invalid token")
     
-
+@app.get("/createresourcegroup/")
+def createresourcegroup( name: Assistant, authorization: str = Header(...)):
+    payload = authorised(authorization)
+    userData = payload.get("sub")
+    print("....userdata",userData)
+    tokenData=json.loads(userData)
 
 
 @app.get("/products/")

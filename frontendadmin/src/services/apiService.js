@@ -13,6 +13,21 @@ const getResourceGroups = async (token) => {
   }
 };
 
+const createResourceGroup = async (token, name) => {
+  try {
+    const response = await fetch("http://127.0.0.1:8000/createresourcegroup/", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const data = await response.json();
+    if (data?.resource_groups) return data.resource_groups;
+    return;
+  } catch (e) {
+    console.log(e);
+    return;
+  }
+};
+
 const getProductsOfResourceGroup = async ({ token }) => {
   try {
     const response = await fetch("http://127.0.0.1:8000/products/", {
@@ -173,6 +188,7 @@ const uploadPDF = async (token, formData) => {
 
 export {
   getResourceGroups,
+  createResourceGroup,
   getProductsOfResourceGroup,
   getResouceGroupFromUsername,
   getDataFromProductName,
