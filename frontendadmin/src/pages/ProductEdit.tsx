@@ -17,9 +17,8 @@ import { Icon } from "@iconify/react";
 import Button from "../components/UI/button/Button";
 import Modal from "../components/UI/modal/Modal";
 import NewProblem from "../components/newProblem";
+import PDFHandler from "../components/pdfHandler";
 
-const url =
-  "https://admin-panel-79c71-default-rtdb.europe-west1.firebasedatabase.app/products";
 function ProductEdit() {
   const { t } = useTranslation();
   const params = useParams();
@@ -32,12 +31,12 @@ function ProductEdit() {
   const [editable, setEditable] = useState<boolean>(false);
   const [newProblem, setNewProblem] = useState<boolean>(false);
   const [selectedProblem, setSelectedProblem] = useState<ITSList>();
+  const [uploadEnabled, setUploadEnabled] = useState<boolean>(false);
+  const [pdfProblems, setPdfProblems] = useState<ITSList[] | []>([]);
 
-  let productInfo: IProductsTable = products.filter(
-    (item) => item.ID.toString() === productId
-  )[0];
-
-  let productEdit;
+  useEffect(() => {
+    console.log(pdfProblems);
+  }, [pdfProblems]);
 
   // const { data, error, status } = useFetch<IProductsTable>(
   //   `${url}/${productId}.json`
@@ -137,7 +136,23 @@ function ProductEdit() {
       {editable && (
         <div>
           <Button onClick={() => setNewProblem(true)}>New Problem</Button>
+          <Button onClick={() => setUploadEnabled(true)}>
+            Import From PDF
+          </Button>
         </div>
+      )}
+      {uploadEnabled && (
+        <Modal
+          title="Import From PDF"
+          onConfirm={() => {
+            setUploadEnabled(false);
+          }}
+        >
+          <PDFHandler
+            pdfProblems={pdfProblems}
+            setPdfProblems={setPdfProblems}
+          ></PDFHandler>
+        </Modal>
       )}
       {productData.length > 0 && productName && (
         <ProblemList

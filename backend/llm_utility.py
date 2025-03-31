@@ -115,7 +115,7 @@ class LLMUtility:
             [
             {{
                 "problem": 'Describe the user-facing issue or symptom',
-                "solution steps": [<Explain the step-by-step solution or instructions if available>]
+                "steps": [<Explain the step-by-step solution or instructions if available>]
             }},
             ...
             ]

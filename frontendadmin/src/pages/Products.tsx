@@ -7,10 +7,15 @@ import { productsHeader } from "../constants/tables";
 import LoadingSpinner from "../components/UI/loadingSpinner/LoadingSpinner";
 import Dropdown from "../components/UI/dropdown/Dropdown";
 import { useAdminStore } from "../store/zustand/store";
+import Button from "../components/UI/button/Button";
+import { useNavigate } from "react-router-dom";
+import Modal from "../components/UI/modal/Modal";
+import CreateProduct from "../components/createProduct";
 
 function Products() {
   const { t } = useTranslation();
   const products = useAdminStore((state) => state.products);
+  const [createProduct, setCreateProduct] = useState<boolean>(false);
 
   // if (status === "loading") {
   //   productsTable = <LoadingSpinner />;
@@ -44,7 +49,22 @@ function Products() {
 
   return (
     <section>
+      {createProduct && (
+        <Modal title="Create New Product" onConfirm={() => {}}>
+          <CreateProduct></CreateProduct>
+        </Modal>
+      )}
       <h2 className="title">{t("products")}</h2>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          width: "100%",
+        }}
+      >
+        <Button onClick={() => setCreateProduct(true)}>New Product</Button>
+      </div>
       {/* <Dropdown
         dropdownData={dropdownOptions}
         onChange={selectedChangeHandler}

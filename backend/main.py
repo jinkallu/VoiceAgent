@@ -72,6 +72,9 @@ class ProductResourceRequest(BaseModel):
 class ProductData(BaseModel):
     product_name:str
     data:list
+
+class ProductName(BaseModel):
+    product_name:str
 class ProductImgDataRequest(BaseModel):
     img_url: str  # Expected data key (resource group name)
 
@@ -259,44 +262,79 @@ def product_data(request_data: ProductResourceRequest, authorization: str = Head
 
 @app.post("/upload_productdata/")
 async def uploadProductdata(request_data:ProductData, authorization: str = Header(...)):
-    payload = authorised(authorization)
-    # Check if it's a PDFuserData = payload.get("sub")
-    
-    payload = authorised(authorization)
-    userData = payload.get("sub")
-    tokenData=json.loads(userData)
+    try:
+        payload = authorised(authorization)
+        # Check if it's a PDFuserData = payload.get("sub")
         
-    blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0])
-    if len(blob_storage) == 0:
-        return
+        payload = authorised(authorization)
+        userData = payload.get("sub")
+        tokenData=json.loads(userData)
+            
+        blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0])
+        if len(blob_storage) == 0:
+            return
+            
+        azureOps.blobOps.setBlobServiceClient(storage_name=blob_storage[0]["name"])
+        container_name=f"prd-{request_data.product_name}"
+        azureOps.blobOps.setContainerClient(container_name=container_name)
         
-    azureOps.blobOps.setBlobServiceClient(storage_name=blob_storage[0]["name"])
-    container_name=f"prd-{request_data.product_name}"
-    azureOps.blobOps.setContainerClient(container_name=container_name)
-       
 
-    azureOps.blobOps.createOrReplaceBlobFromPyDict(os.getenv("PRODUCT_DATA_FILE_NAME"), request_data.data)
+        res=azureOps.blobOps.createOrReplaceBlobFromPyDict(os.getenv("PRODUCT_DATA_FILE_NAME"), request_data.data)
+        return res
+    except Exception as e:
+        print(e)
+        return 
 
 
-@app.post("/upload/")
-async def upload(file: UploadFile = File(...), authorization: str = Header(...)):
-    payload = authorised(authorization)
-    # Check if it's a PDF
-    if file.content_type != "application/pdf":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Only PDF files are accepted."
-        )
+@app.post("/add_product/")
+async def uploadProductdata(request_data:ProductName, authorization: str = Header(...)):
+    try:
+        payload = authorised(authorization)
+        # Check if it's a PDFuserData = payload.get("sub")
+        
+        payload = authorised(authorization)
+        userData = payload.get("sub")
+        tokenData=json.loads(userData)
+            
+        blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0])
+        if len(blob_storage) == 0:
+            return
+            
+        azureOps.blobOps.setBlobServiceClient(storage_name=blob_storage[0]["name"])
+        container_name=f"prd-{request_data.product_name}"
+        res=azureOps.blobOps.createContainerIfNotExists(container_name=container_name)
+        return {"result":res}
+    except Exception as e:
+        print(e)
+        return {"result":False}
+        
 
-    pdf_bytes = await file.read()
-    problems_data, images = processPDF.process(file_data = pdf_bytes)
-    print(problems_data)
-    azureOps.blobOps.setBlobServiceClient("tralpinestorage1")
-    azureOps.blobOps.setContainerClient(os.environ.get("PRODUCTS_BLOB_CONTAINER"))
 
-    azureOps.blobOps.createOrReplaceBlobFromPyDict("test_product.json", problems_data)
+@app.post("/upload_pdf/")
+async def uploadPdf(file: UploadFile = File(...), authorization: str = Header(...)):
+    try:
+        payload = authorised(authorization)
+        print("upload pdf called...",payload)
+        # Check if it's a PDF
+        if file.content_type != "application/pdf":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Only PDF files are accepted."
+            )
 
-    print(f"Received file: {file.filename}")
+        pdf_bytes = await file.read()
+        problems_data, images = processPDF.process(file_data = pdf_bytes)
+        # azureOps.blobOps.setBlobServiceClient("tralpinestorage1")
+        # azureOps.blobOps.setContainerClient(os.environ.get("PRODUCTS_BLOB_CONTAINER"))
+
+        # azureOps.blobOps.createOrReplaceBlobFromPyDict("test_product.json", problems_data)
+
+        return {"data":problems_data,"status":200}
+    except Exception as e:
+        print(e)
+        return {"data":[],"status":400}
+
+
 
 @app.post("/product_image/")
 def product_image(request_data: ProductImgDataRequest, authorization: str = Header(...)):

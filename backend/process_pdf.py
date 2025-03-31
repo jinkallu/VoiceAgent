@@ -26,16 +26,10 @@ class ProcessPDF:
         how_to_python_dict = json.loads(clean_json_string)
 
         full_problem_list = ts_python_dict + how_to_python_dict
-        print(len(full_problem_list))
-        print(full_problem_list)
 
         step_2 = self.lLMUtility.troubelshooting_step2(text, full_problem_list)
-        print(len(step_2))
-        print(step_2)
 
         step_3 = self.lLMUtility.troubelshooting_step3(text, step_2)
-        print(len(step_3))
-        print(step_3)
 
         clean_json_string = self.clean_json_markdown_block(step_3)
         full_problem_list_python_dict = json.loads(clean_json_string)

@@ -124,6 +124,53 @@ const uploadProductData = async (token, product_name, data) => {
   }
 };
 
+const addProduct = async (token, product_name) => {
+  try {
+    const response = await fetch("http://127.0.0.1:8000/add_product/", {
+      method: "POST",
+      body: JSON.stringify({
+        product_name,
+      }),
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json", // Ensure you're sending JSON
+      },
+    });
+    if (response.status !== 200) {
+      return { status: response.status, message: "Unauthorized" };
+    } else {
+      const data = await response.json();
+      return { status: 200, data };
+    }
+  } catch (e) {
+    console.log(e);
+    return;
+  }
+};
+
+const uploadPDF = async (token, formData) => {
+  try {
+    const response = await fetch("http://127.0.0.1:8000/upload_pdf/", {
+      method: "POST",
+      body: formData,
+
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (response.status !== 200) {
+      return { status: response.status, message: "Unauthorized" };
+    } else {
+      const data = await response.json();
+      console.log(data);
+      return { ...data, status: 200 };
+    }
+  } catch (e) {
+    console.log(e);
+    return;
+  }
+};
+
 export {
   getResourceGroups,
   getProductsOfResourceGroup,
@@ -131,4 +178,6 @@ export {
   getDataFromProductName,
   getProductResource,
   uploadProductData,
+  addProduct,
+  uploadPDF,
 };

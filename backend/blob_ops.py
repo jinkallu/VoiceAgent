@@ -69,6 +69,7 @@ class BlobOps:
             return True
         except Exception as e:
             print("Container may already exist:", e)
+            return False
     
     def createOrReplaceBlobFromJson(self, blob_name, json_data):
         blob_client = self.container_client.get_blob_client(blob_name)
