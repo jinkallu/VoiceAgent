@@ -60,7 +60,7 @@ class UserLogin(BaseModel):
     password: str
 
 class Assistant(BaseModel):
-    name: str
+    res_name: str
 class ProductRequest(BaseModel):
     rg_name: str  # Expected data key (resource group name)
 
@@ -117,8 +117,7 @@ def register(user_data: UserRegister):
         raise HTTPException(status_code=400, detail="Username already registered")
 
     # Hash the password
-    hashed_password = pwd_context.hash(user_data.password)
-    
+    hashed_password = pwd_context.hash(user_data.password)    
     user ={
         "username":user_data.username, 
         "hashed_password":hashed_password,
@@ -194,12 +193,14 @@ def authorised(authorization):
         else:
             raise HTTPException(status_code=401, detail="Invalid token")
     
-@app.get("/createresourcegroup/")
-def createresourcegroup( name: Assistant, authorization: str = Header(...)):
-    payload = authorised(authorization)
-    userData = payload.get("sub")
-    print("....userdata",userData)
-    tokenData=json.loads(userData)
+@app.post("/createresourcegroup/")
+def createresourcegroup( res: Assistant, authorization: str = Header(...)):
+    #payload = authorised(authorization)
+    #userData = payload.get("sub")
+    #print("....userdata",userData)
+    res_name = res.res_name
+    print(res_name)
+    azureOps.provision_resources(res_name)
 
 
 @app.get("/products/")

@@ -7,14 +7,18 @@ function Assistant() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [resourceName, setResourceName] = useState("");
     const resourceGroup = useAdminStore((state) => state.resourceGroup);
+    const token = useAdminStore((state) => state.token);
 
     useEffect(() => {
         console.log(resourceGroup)
 
     }, [resourceGroup])
 
-    async function createResourceGroup(){
-        //const res = await createResourceGroup(token, formData);
+    async function createAssistant(res_name:string){
+        if (!res_name){
+            return
+        }
+        const res = await createResourceGroup(token, res_name);
     }
 
     return (
@@ -63,7 +67,8 @@ function Assistant() {
                             </button>
                             <button
                                 onClick={() => {
-                                    console.log("Resource Created:", resourceName);
+                                    //console.log("Resource Created:", resourceName);
+                                    createAssistant(resourceName)
                                     setIsModalOpen(false);
                                 }}
                                 className="px-4 py-2 bg-blue-500 text-white rounded"

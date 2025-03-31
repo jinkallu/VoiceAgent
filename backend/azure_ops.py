@@ -32,7 +32,7 @@ class AzureOps:
         self.cognitiveServicesMgmt = CognitiveServicesMgmt(credential, self.AZURE_SUBSCRIPTION_ID)
 
     def generate_random_alphanumeric(self, length):
-        characters = string.ascii_letters + string.digits  # a-z, A-Z, 0-9
+        characters = string.ascii_lowercase + string.digits  # a-z, 0-9
         return ''.join(random.choices(characters, k=length))
     
     def get_resource_names_by_type(self, newresources, target_type):

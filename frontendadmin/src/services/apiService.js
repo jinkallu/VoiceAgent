@@ -13,10 +13,17 @@ const getResourceGroups = async (token) => {
   }
 };
 
-const createResourceGroup = async (token, name) => {
+const createResourceGroup = async (token, res_name) => {
   try {
     const response = await fetch("http://127.0.0.1:8000/createresourcegroup/", {
-      headers: { Authorization: `Bearer ${token}` },
+      method: "POST",
+      body: JSON.stringify({
+        res_name,
+      }),
+      headers: { 
+        "Content-Type": "application/json", // <-- Add this!
+        Authorization: `Bearer ${token}` 
+      },
     });
 
     const data = await response.json();
