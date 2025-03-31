@@ -195,12 +195,13 @@ def authorised(authorization):
     
 @app.post("/createresourcegroup/")
 def createresourcegroup( res: Assistant, authorization: str = Header(...)):
-    #payload = authorised(authorization)
-    #userData = payload.get("sub")
-    #print("....userdata",userData)
+    payload = authorised(authorization)
+    userData = payload.get("sub")
+    sub_data = json.loads(userData)
+    username = sub_data['username']
     res_name = res.res_name
     print(res_name)
-    azureOps.provision_resources(res_name)
+    azureOps.provision_resources(res_name, username)
 
 
 @app.get("/products/")

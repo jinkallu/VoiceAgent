@@ -7,6 +7,7 @@ from loganalytics_mgmt import LogAnalyticsMgmt
 from container_reg_mgmt import ContainerRegistryMgmt
 from identity_management import IdentityManagement
 from cogni_services_mgmt import CognitiveServicesMgmt
+from auth_mgmt import AuthManagement
 
 import random
 import string
@@ -17,6 +18,9 @@ from dotenv import load_dotenv
 load_dotenv()
 class AzureOps:
     def __init__(self):
+
+        self.permanent_rg_name = os.environ.get("PERMANENT_RG_NAME")
+        self.permanent_rg_acr_name = os.environ.get("PERMANENT_ACR_NAME")
 
         self.AZURE_SUBSCRIPTION_ID = os.environ.get("AZURE_SUBSCRIPTION_ID")
 
@@ -30,6 +34,7 @@ class AzureOps:
         self.containerRegistryMgmt = ContainerRegistryMgmt(credential, self.AZURE_SUBSCRIPTION_ID)
         self.identityManagement = IdentityManagement(credential, self.AZURE_SUBSCRIPTION_ID)
         self.cognitiveServicesMgmt = CognitiveServicesMgmt(credential, self.AZURE_SUBSCRIPTION_ID)
+        self.authManagement = AuthManagement(credential, self.AZURE_SUBSCRIPTION_ID)
 
     def generate_random_alphanumeric(self, length):
         characters = string.ascii_lowercase + string.digits  # a-z, 0-9
@@ -39,14 +44,36 @@ class AzureOps:
         return [res["name"] for res in newresources if res["type"].lower() == target_type.lower()]
 
 
-    def provision_resources(self, rg_name, location="eastus 2"):
+    def provision_resources(self, rg_name, user_name, location="eastus 2"):
         # Create resource group
+        # TODO: check if the RG is already exists, if so generate new name
         resource_group = self.resourceManagement.getResourceGroup(rg_name)
         if resource_group is None:
             resource_group = self.resourceManagement.createResourceGroup(rg_name, location)
             if resource_group is None:
                 # TODO: Manage resource_group creation error
                 pass
+            else: # update users.json with this resource
+                blob_storage = self.resourceManagement.get_blobstorage_from_resource_group(os.getenv("AZURE_ADMIN_RESOURCE_GROUP"))
+                print(blob_storage)
+                if(len(blob_storage)>0):
+                    storageName=blob_storage[0]["name"]
+                    self.blobOps.setBlobServiceClient(storage_name=storageName)
+                    self.blobOps.setContainerClient(os.getenv("AZURE_ADMIN_CONTAINER_NAME"))
+
+                    userData=self.blobOps.getStorageMappingAsJson(os.getenv("AZURE_ADMIN_BLOB_NAME"))
+
+                    user = next((u for u in userData if u["username"] == user_name), None)
+                    if user:
+                        user["resourceGroups"].append({"rg-name": rg_name, "app-url":None})
+                        try:
+                            res=self.blobOps.createOrReplaceBlobFromPyDict(os.getenv("AZURE_ADMIN_BLOB_NAME"), userData)
+                            print(res)
+                        except Exception as e:
+                            print(e)
+
+                    
+
         else:
             print("resource_group already exists")
 
@@ -54,7 +81,7 @@ class AzureOps:
         resources = self.resourceManagement.list_resources_in_group(rg_name)
         
         workspace_names = self.get_resource_names_by_type(resources, 'Microsoft.OperationalInsights/workspaces')
-        workspace_name = "test-loganalytics"
+        workspace_name = f"{rg_name}-loganalytics"
         workspace = None
         if len(workspace_names) > 0:
             workspace_name = workspace_names[0]
@@ -74,7 +101,7 @@ class AzureOps:
         
         container_app_env_names = self.get_resource_names_by_type(resources, "Microsoft.App/managedEnvironments")    
         # Create Container Apps Env
-        env_name = "test-env"
+        env_name = f"{rg_name}-env"
         env = None
         if len(container_app_env_names) > 0:
             env_name = container_app_env_names[0]
@@ -93,7 +120,7 @@ class AzureOps:
      
         # Create blob storage
         storage_account_names = self.get_resource_names_by_type(resources, "Microsoft.Storage/storageAccounts")
-        storage_account_name = "test" + self.generate_random_alphanumeric(5)
+        storage_account_name = rg_name + self.generate_random_alphanumeric(5)
         storage_account = None
         if len(storage_account_names) > 0:
             storage_account_name = storage_account_names[0]
@@ -123,7 +150,7 @@ class AzureOps:
                 print("Accessed container registry")
         else:
             for i in range(10):
-                registry_name = "test" + self.generate_random_alphanumeric(5)
+                registry_name = rg_name + self.generate_random_alphanumeric(5)
                 if self.containerRegistryMgmt.nameAvailable(registry_name):
                     break
             registry = self.containerRegistryMgmt.createContainerRegistry(rg_name, registry_name, location)
@@ -133,7 +160,7 @@ class AzureOps:
 
         #Container App
         app_names = self.get_resource_names_by_type(resources, "Microsoft.App/containerApps")
-        app_name = "test-app"
+        app_name = f"{rg_name}-app"
         app = None
         if len(app_names) > 0:
             app_name = app_names[0]
@@ -148,10 +175,33 @@ class AzureOps:
             if app is None:
                 # TODO: Manage container apps env creation error
                 pass
+            else:
+                app_url = self.containerManagement.getContainerAppURL(rg_name, app_name)
+                blob_storage = self.resourceManagement.get_blobstorage_from_resource_group(os.getenv("AZURE_ADMIN_RESOURCE_GROUP"))
+                print(blob_storage)
+                if(len(blob_storage)>0):
+                    storageName=blob_storage[0]["name"]
+                    self.blobOps.setBlobServiceClient(storage_name=storageName)
+                    self.blobOps.setContainerClient(os.getenv("AZURE_ADMIN_CONTAINER_NAME"))
+
+                    userData=self.blobOps.getStorageMappingAsJson(os.getenv("AZURE_ADMIN_BLOB_NAME"))
+
+                    user = next((u for u in userData if u["username"] == user_name), None)
+                    if user:
+                        if len(user["resourceGroups"]) > 0:
+                            user["resourceGroups"][0]["app-url"] = app_url
+                            try:
+                                res=self.blobOps.createOrReplaceBlobFromPyDict(os.getenv("AZURE_ADMIN_BLOB_NAME"), userData)
+                                print(res)
+                            except Exception as e:
+                                print(e)
+                        else:
+                            print("Erorr, resourceGroups length")
+
 
         # Create managed identity
         identity_names = self.get_resource_names_by_type(resources, "Microsoft.ManagedIdentity/userAssignedIdentities")
-        identity_name = "test-identity"
+        identity_name = f"{rg_name}-identity"
         identity = None
         if len(identity_names) > 0:
             identity_name = identity_names[0]
@@ -166,9 +216,14 @@ class AzureOps:
             if identity is None:
                 # TODO: Manage identity creation error
                 pass
+            else:
+                principal_id = identity.principal_id
+                self.authManagement.authAccessToACR(principal_id, self.permanent_rg_acr_name, self.permanent_rg_name)
+                self.authManagement.authAccessToRG(principal_id, rg_name)
+
         # AI services
         aiservice_names =  self.get_resource_names_by_type(resources, "Microsoft.CognitiveServices/accounts")
-        aiservice_name = "testOAI1"
+        aiservice_name = f"{rg_name}OAI"
         aiservice = None
         if len(aiservice_names) > 0:
             aiservice_name = aiservice_names[0]
@@ -219,7 +274,8 @@ def test_create_container_env(azure_ops):
 
 if __name__ == "__main__":
     azure_ops = AzureOps()
-    azure_ops.provision_resources("test")
+    azure_ops.authManagement.authAccessToACR(identity_principal_id="1373c93f-a342-419d-b42b-8935860e93df", acr_name="testagent5acrs2kzrdow3y3rq", acr_rg_name="rg-testagent5")
+    #azure_ops.provision_resources("test")
     #azure_ops.resourceManagement.list_resource_groups()
     #azure_ops.resourceManagement.createResourceGroup("test", "westeurope")
     #azure_ops.resourceManagement.list_resource_groups()

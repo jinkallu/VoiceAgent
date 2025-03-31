@@ -23,6 +23,7 @@ class ContainerManagement:
         # Get the URL (Fully Qualified Domain Name)
         url = f"https://{app.configuration.ingress.fqdn}"
         print("Container App URL:", url)
+        return url
 
     def getContainerAppsEnv(self, rg_name, env_name):
         try:
