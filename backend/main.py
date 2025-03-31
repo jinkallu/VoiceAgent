@@ -86,23 +86,50 @@ def create_access_token(data):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+def getUserData():
+    try:
+        blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(os.getenv("AZURE_ADMIN_RESOURCE_GROUP"))
+        print(blob_storage)
+        if(len(blob_storage)>0):
+            storageName=blob_storage[0]["name"]
+            azureOps.blobOps.setBlobServiceClient(storage_name=storageName)
+            azureOps.blobOps.setContainerClient(os.getenv("AZURE_ADMIN_CONTAINER_NAME"))
+
+            userData=azureOps.blobOps.getStorageMappingAsJson(os.getenv("AZURE_ADMIN_BLOB_NAME"))
+            return userData
+    except Exception as e:
+        print("error in accessing userdata", e)
+
 @app.post("/register/")
-def register(user_data: UserRegister, db: Session = Depends(get_db)):
+def register(user_data: UserRegister):
     # Log the received data
-    print(f"Received user data: {user_data}")
+    print(f"*Received user data: {user_data}")
 
     # Check if the username already exists
-    existing_user = db.query(User).filter(User.username == user_data.username).first()
-    if existing_user:
+    userData = getUserData()
+    print(userData)
+    user_exists = any(user["username"] == user_data.username for user in userData)
+
+    if user_exists:
         raise HTTPException(status_code=400, detail="Username already registered")
 
     # Hash the password
     hashed_password = pwd_context.hash(user_data.password)
-    user = User(username=user_data.username, hashed_password=hashed_password)
-    db.add(user)
-    db.commit()
+    user ={
+        "username":user_data.username, 
+        "hashed_password":hashed_password,
+        "resourceGroups": []
+        }
+    userData.append(user)
+    print(userData)
+    try:
+        res=azureOps.blobOps.createOrReplaceBlobFromPyDict(os.getenv("AZURE_ADMIN_BLOB_NAME"), userData)
+        print(res)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Could not register the user")
 
-    return {"message": "User registered successfully"}
+
+    return {"message": "User registered successfully", "res": res}
 
 
 @app.post("/login/")
@@ -112,19 +139,13 @@ def login(user_data: UserLogin,):
     # if not user or not pwd_context.verify(user_data.password, user.hashed_password):
     #     raise HTTPException(status_code=401, detail="Invalid credentials")
     try:
-        blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(os.getenv("AZURE_ADMIN_RESOURCE_GROUP"))
-        if(len(blob_storage)>0):
-            storageName=blob_storage[0]["name"]
-            azureOps.blobOps.setBlobServiceClient(storage_name=storageName)
-            azureOps.blobOps.setContainerClient(os.getenv("AZURE_ADMIN_CONTAINER_NAME"))
-
-            userData=azureOps.blobOps.getStorageMappingAsJson(os.getenv("AZURE_ADMIN_BLOB_NAME"))
+            userData = getUserData()
             if(len(userData)>0):
                 for item in userData:
-                    if(item['username']==user_data.username and item['password']==user_data.password):
+                    if(item['username']==user_data.username and pwd_context.verify(user_data.password, item["hashed_password"])):
                         user=item
                         access_token = create_access_token({"username":user_data.username,"resourceGroups":item["resourceGroups"] or []})
-                        return {"access_token": access_token}
+                        return {"access_token": access_token, "resourceGroups":item["resourceGroups"] or []}
 
     except Exception as e:
         print(e)
@@ -178,22 +199,29 @@ def products( authorization: str = Header(...)):
     userData = payload.get("sub")
     print("....userdata",userData)
     tokenData=json.loads(userData)
-    
-    blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0])
-    print(blob_storage[0]["name"])
-    if len(blob_storage) == 0:
-        return
-    
-    azureOps.blobOps.setBlobServiceClient(storage_name=blob_storage[0]["name"])
 
-    containers=azureOps.blobOps.getContainersList()
     prdContainers=[]
-    for container in containers:
-        nameArray=container["name"].split("-")
-        if(nameArray[0]=="prd"):
-            prdContainers.append("-".join(nameArray[1:]))
+    
+    try:
+        if len(tokenData["resourceGroups"]) > 0:
+            blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0]["rg-name"])
+            print(blob_storage[0]["name"])
+            if len(blob_storage) == 0:
+                return
             
-    print("containers",prdContainers)  
+            azureOps.blobOps.setBlobServiceClient(storage_name=blob_storage[0]["name"])
+
+            containers=azureOps.blobOps.getContainersList()
+            
+            for container in containers:
+                nameArray=container["name"].split("-")
+                if(nameArray[0]=="prd"):
+                    prdContainers.append("-".join(nameArray[1:]))
+                    
+            print("containers",prdContainers)  
+
+    except Exception as e:
+        return {"products": [], "detail": "Error"}
 
     return {"products": prdContainers}
 
@@ -204,7 +232,7 @@ def product_data(request_data: ProductDataRequest, authorization: str = Header(.
         userData = payload.get("sub")
         tokenData=json.loads(userData)
         
-        blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0])
+        blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0]["rg-name"])
         if len(blob_storage) == 0:
             return
         
@@ -229,7 +257,7 @@ def product_data(request_data: ProductResourceRequest, authorization: str = Head
         userData = payload.get("sub")
         tokenData=json.loads(userData)
         
-        blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0])
+        blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0]["rg-name"])
         if len(blob_storage) == 0:
             return
         
@@ -270,7 +298,7 @@ async def uploadProductdata(request_data:ProductData, authorization: str = Heade
         userData = payload.get("sub")
         tokenData=json.loads(userData)
             
-        blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0])
+        blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0]["rg-name"])
         if len(blob_storage) == 0:
             return
             
@@ -296,7 +324,7 @@ async def uploadProductdata(request_data:ProductName, authorization: str = Heade
         userData = payload.get("sub")
         tokenData=json.loads(userData)
             
-        blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0])
+        blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0]["rg-name"])
         if len(blob_storage) == 0:
             return
             

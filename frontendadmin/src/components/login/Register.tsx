@@ -10,20 +10,66 @@ import classes from "./Login.module.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { useAdminStore } from "../../store/zustand/store";
 
-function LoginBox() {
+function RegisterBox() {
   const loginCtx = useContext(LoginContext);
   const langCtx = useContext(langContextObj);
   const userNameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
+  const verifyPasswordRef = useRef<HTMLInputElement>(null);
   const errorMessageRef = useRef<HTMLSpanElement>(null);
+  const userNameErrorMessage = useRef<HTMLSpanElement>(null);
   const navigate = useNavigate();
   const { t } = useTranslation();
   const setToken = useAdminStore((state) => state.setToken);
   const setResourceGroup = useAdminStore((state) => state.setResourceGroup);
 
-  async function loginHandler(e: React.FormEvent) {
+  function checkPWDComplexity(pwd:string){
+    // TODO: add more complexities
+    if (!pwd){
+        return false;
+    }
+    else if(pwd.length < 4){
+        return false
+    }
+    return true
+  }
+
+  async function registerHandler(e: React.FormEvent) {
     e.preventDefault();
-    const response = await fetch("http://127.0.0.1:8000/login/", {
+
+    if(passwordRef === null || verifyPasswordRef === null){
+        return;
+    }
+    if(passwordRef.current === null || verifyPasswordRef.current === null){
+        return;
+    }
+    
+
+    const password = passwordRef.current.value;
+    const verifyPassword = verifyPasswordRef.current.value;
+
+    if (password !== verifyPassword) {
+        passwordRef?.current?.focus();
+        errorMessageRef.current?.setAttribute(
+            "style",
+            "display: inline-block;opacity: 1"
+          );
+        return
+    } 
+
+    if(!checkPWDComplexity(password)){
+        errorMessageRef.current?.setAttribute(
+            "style",
+            "display: inline-block;opacity: 1"
+          );
+        return
+    }
+
+    
+
+
+
+    const response = await fetch("http://127.0.0.1:8000/register/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -43,9 +89,9 @@ function LoginBox() {
       navigate("/");
     } else {
       userNameRef?.current?.focus();
-      errorMessageRef.current?.setAttribute(
+      userNameErrorMessage.current?.setAttribute(
         "style",
-        "display: inline-block;opacity: 1"
+        "display: inline-block;opacity: 1",
       );
     }
   }
@@ -60,8 +106,8 @@ function LoginBox() {
         <div className={classes.logo}>
           <img src={images.logo} alt="digikala" />
         </div>
-        <h2 className={classes.title}>{t("loginPage")}</h2>
-        <form onSubmit={loginHandler}>
+        <h2 className={classes.title}>{t("registrationPage")}</h2>
+        <form onSubmit={registerHandler}>
           <Input
             ref={userNameRef}
             type={"text"}
@@ -69,21 +115,19 @@ function LoginBox() {
             placeholder={"admin"}
             value="test"
           />
-          <span ref={errorMessageRef} className={classes.errorMessage}>
-            {t("errorMessage")}
+          <span ref={userNameErrorMessage} className={classes.errorMessage}>
+            {t("userNameErrorMessage")}
           </span>
+          
           <Input type={"password"} id={"pass"} value="test" ref={passwordRef} />
-          <Button type="submit">{t("login")}</Button>
-          <Link className={classes.forgat_pass} to="/">
-            {t("forgetPass")}
-          </Link>          
-          <div className={classes.checkbox}>
-            <input type="checkbox" id="rememberMe" />
-            <label htmlFor="rememberMe">{t("rememberMe")}</label>
-          </div>
+          <span ref={errorMessageRef} className={classes.errorMessage}>
+            {t("pwdErrorMessage")}
+          </span>
+          <Input type={"password"} id={"veripass"} value="test" ref={verifyPasswordRef}/>
+          <Button type="submit">{t("register")}</Button>
         </form>       
-          <Link className={classes.forgat_pass} to="/register">
-          Register
+        <Link className={classes.forgat_pass} to="/login">
+          Login
           </Link> 
       </div>
 
@@ -97,4 +141,4 @@ function LoginBox() {
   );
 }
 
-export default LoginBox;
+export default RegisterBox;

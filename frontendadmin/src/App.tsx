@@ -13,6 +13,9 @@ const ProductEdit = React.lazy(() => import("./pages/ProductEdit"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 const BlankPage = React.lazy(() => import("./pages/BlankPage"));
 const Login = React.lazy(() => import("./pages/Login"));
+const Register = React.lazy(() => import("./pages/Register"));
+const Assistant = React.lazy(() => import("./pages/Assistant"));
+
 
 function App() {
   const token =
@@ -34,9 +37,11 @@ function App() {
               <Route path="/analytics" element={<BlankPage />} />
               <Route path="/discount" element={<BlankPage />} />
               <Route path="/inventory" element={<BlankPage />} />
+              <Route path="/assistant" element={<Assistant />} />
             </Route>
           </Route>
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
