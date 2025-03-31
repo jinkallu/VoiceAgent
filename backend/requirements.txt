@@ -15,3 +15,7 @@ azure-storage-blob
 azure-mgmt-storage
 azure-mgmt-appcontainers
 python-dotenv
+azure-mgmt-loganalytics
+azure-mgmt-containerregistry
+azure-mgmt-msi
+azure-mgmt-cognitiveservices

@@ -335,6 +335,13 @@ async def uploadPdf(file: UploadFile = File(...), authorization: str = Header(..
         return {"data":[],"status":400}
 
 
+    # for img_dict in images:
+    #     for name, img in img_dict.items():
+    #         name = "images/" + name
+    #         azureOps.blobOps.createOrUpdateBlob(name, img)
+
+
+    # print(f"Received file: {file.filename}")
 
 @app.post("/product_image/")
 def product_image(request_data: ProductImgDataRequest, authorization: str = Header(...)):

@@ -1,4 +1,5 @@
 from azure.mgmt.storage import StorageManagementClient
+from azure.core.exceptions import ResourceNotFoundError
 
 class StorageManagement:
     def __init__(self, credential, AZURE_SUBSCRIPTION_ID):
@@ -17,6 +18,14 @@ class StorageManagement:
                 rg_name, storage_account_name, params
             )
             account_result = poller.result()
-            return True
+            return account_result
         except Exception as e:
             print(f"Error in creating storage account{e}")
+
+    def getStorageAccount(self, rg_name, storage_account_name):
+        try:
+            account = self.storage_client.storage_accounts.get_properties(rg_name, storage_account_name)
+            return account
+        except ResourceNotFoundError:
+            print("Storage account does not exist.")
+

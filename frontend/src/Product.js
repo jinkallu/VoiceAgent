@@ -36,20 +36,20 @@ const Product = ({ token, index, product }) => {
                 img_url: product_data.image_names[i] || null,  // Example data to send
             };
 
-            // fetch("http://127.0.0.1:8000/product_image/", {
-            //     method: "POST",  // Use POST method to send data
-            //     headers: {
-            //         Authorization: `Bearer ${token}`,
-            //         'Content-Type': 'application/json'  // Ensure you're sending JSON 
-            //     },
-            //     body: JSON.stringify(requestData),  // Convert the JavaScript object to JSON string
-            // })
-            //     .then((res) => res.json())
-            //     .then((data) => {
-            //         console.log(data)
-            //         updateImage(product_data.image_names[i], data.image_data || []);
-            //     })
-            //     .catch(() => setMessage("Unauthorized"));
+            fetch("http://127.0.0.1:8000/product_image/", {
+                method: "POST",  // Use POST method to send data
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json'  // Ensure you're sending JSON 
+                },
+                body: JSON.stringify(requestData),  // Convert the JavaScript object to JSON string
+            })
+                .then((res) => res.json())
+                .then((data) => {
+                    console.log(data)
+                    updateImage(product_data.image_names[i], data.image_data || []);
+                })
+                .catch(() => setMessage("Unauthorized"));
         }
 
     }, [product_data])
