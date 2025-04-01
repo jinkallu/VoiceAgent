@@ -41,3 +41,19 @@ class AuthManagement:
             parameters=role_assignment_params
         )
 
+    def authAccessToStorage(self, identity_principal_id, rg_name, storage_account_name):
+        # Scope: Resource Group level
+        scope = f"/subscriptions/{self.AZURE_SUBSCRIPTION_ID}/resourceGroups/{rg_name}/providers/Microsoft.Storage/storageAccounts/{storage_account_name}"
+
+        role_assignment_params = RoleAssignmentCreateParameters(
+            principal_id=identity_principal_id,
+            role_definition_id=f"/subscriptions/{self.AZURE_SUBSCRIPTION_ID}/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe",  # "Storage Blob Data Contributor"
+            principal_type="ServicePrincipal"
+        )
+
+        self.client.role_assignments.create(
+            scope=scope,
+            role_assignment_name=str(uuid.uuid4()),
+            parameters=role_assignment_params
+        )
+
