@@ -6,6 +6,7 @@ import json
 from dotenv import load_dotenv
 
 
+load_dotenv()
 
 class BlobOps:
     def __init__(self):
@@ -13,8 +14,6 @@ class BlobOps:
         self.container_client = None
         self.blob_client = None
 
-        if not os.environ.get("PRODUCTS_BLOB_CONTAINER"):
-            load_dotenv()
         
 
     def setBlobServiceClient(self, storage_name):
@@ -24,6 +23,12 @@ class BlobOps:
         # Create the BlobServiceClient object
         self.blob_service_client = BlobServiceClient(connection_url, credential=default_credential)
 
+    def getContainersList(self):
+        containers=self.blob_service_client.list_containers()
+        print("containers",containers)
+        return containers
+    
+
     def setContainerClient(self, container_name):
         # Get a container client to interact with the container
         self.container_client = self.blob_service_client.get_container_client(container_name)
@@ -32,6 +37,7 @@ class BlobOps:
         try:
             # Get a blob client to interact with the specific blob
             blob_client = self.container_client.get_blob_client(blob_name)
+            print(blob_client.url)
 
             # Download the blob's content
             blob_data = blob_client.download_blob()
@@ -41,7 +47,7 @@ class BlobOps:
             #content_str = content.decode('utf-8')
         
             return content
-        except:
+        except Exception as e:
             print("Blob read error", blob_name)
     
     def getStorageMapping(self, mapping_blob_name):
@@ -51,9 +57,9 @@ class BlobOps:
         json_str = self.getStorageMapping(mapping_blob_name)
         return json.loads(json_str)
     
-    def getProductAsJson(self, product_blob_name):
-        json_str = self.getBlobData(product_blob_name)
-        return json.loads(json_str)
+    def getProductData(self, product_blob_name):
+        data = self.getBlobData(product_blob_name)
+        return data
     
     def createContainerIfNotExists(self, container_name):
         container_client = self.blob_service_client.get_container_client(container_name)
@@ -63,18 +69,23 @@ class BlobOps:
             return True
         except Exception as e:
             print("Container may already exist:", e)
-    
-    def createOrReplaceBlobFromJson(self, blob_name, json_data):
+
+    def createOrUpdateBlob(self, blob_name, blob_bytes):
         blob_client = self.container_client.get_blob_client(blob_name)
         try:
             # Upload the JSON string
-            blob_client.upload_blob(json_data, overwrite=True)
+            blob_client.upload_blob(blob_bytes, overwrite=True)
             return True
         except AzureError as e:
             print(f"❌ Azure error occurred: {e}")
 
         except Exception as e:
             print(f"❌ Unexpected error: {e}")
+
+    
+    def createOrReplaceBlobFromJson(self, blob_name, json_data):
+        self.createOrUpdateBlob(blob_name, json_data)
+        
 
     def createOrReplaceBlobFromPyDict(self, blob_name, py_dict):
         # Convert to string or bytes

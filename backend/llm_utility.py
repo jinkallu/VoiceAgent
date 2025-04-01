@@ -107,20 +107,21 @@ class LLMUtility:
 
             You will receive raw, unstructured text extracted from a PDF manual or troubleshooting guide. Your job is to read and analyze this text to identify useful and practical troubleshooting problems.
 
-            In a previous step, an LLM identifies following problems : {problems}, check all of them against the document and add solutions steps to the corresponding problems. Don't miss any of them.
+            In a previous step, an LLM identifies following problems and how-to questions : {problems}, check all {len(problems)} of them against the document and add solutions steps to the corresponding problems. Dont change original problems list. Don't miss any of them.
 
             🧠 Reason about *implied* problems too — not just ones directly mentioned.
 
             🎯 Format the response as clean JSON:
             [
             {{
-                "problem": 'Describe the user-facing issue or symptom',
-                "solution steps": [<Explain the step-by-step solution or instructions if available>]
+                "problem": 'Describe the user-facing issue or symptom or how-to question',
+                "steps": [<Explain the step-by-step solution or instructions if available or how-to steps>]
             }},
             ...
             ]
 
-            Be specific, concise, and avoid repetition, find as many problems as possible.
+            Be specific, concise, find as many problems and how-to questions as possible.
+            Make sure to include all {len(problems)} of problems and how-to questions.
         """.strip()
 
         data = {
