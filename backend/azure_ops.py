@@ -2,12 +2,13 @@ from azure.identity import AzureDeveloperCliCredential, DefaultAzureCredential
 from resource_mgmt import ResourceManagement
 from storage_mgmt import StorageManagement
 from blob_ops import BlobOps
-from container_mgmt import ContainerManagement
+from containerapp_mgmt import ContainerAppManagement
 from loganalytics_mgmt import LogAnalyticsMgmt
 from container_reg_mgmt import ContainerRegistryMgmt
 from identity_management import IdentityManagement
 from cogni_services_mgmt import CognitiveServicesMgmt
 from auth_mgmt import AuthManagement
+from container_mgmt import ContainerMgmt
 
 import random
 import string
@@ -29,12 +30,13 @@ class AzureOps:
         self.resourceManagement = ResourceManagement(credential, self.AZURE_SUBSCRIPTION_ID)
         self.blobOps = BlobOps()
         self.storageManagement = StorageManagement(credential, self.AZURE_SUBSCRIPTION_ID)
-        self.containerManagement = ContainerManagement(credential, self.AZURE_SUBSCRIPTION_ID)
+        self.containerAppManagement = ContainerAppManagement(credential, self.AZURE_SUBSCRIPTION_ID)
         self.logAnalyticsMgmt = LogAnalyticsMgmt(credential, self.AZURE_SUBSCRIPTION_ID)
         self.containerRegistryMgmt = ContainerRegistryMgmt(credential, self.AZURE_SUBSCRIPTION_ID)
         self.identityManagement = IdentityManagement(credential, self.AZURE_SUBSCRIPTION_ID)
         self.cognitiveServicesMgmt = CognitiveServicesMgmt(credential, self.AZURE_SUBSCRIPTION_ID)
         self.authManagement = AuthManagement(credential, self.AZURE_SUBSCRIPTION_ID)
+        self.containerMgmt = ContainerMgmt(credential, self.AZURE_SUBSCRIPTION_ID)
 
     def generate_random_alphanumeric(self, length):
         characters = string.ascii_lowercase + string.digits  # a-z, 0-9
@@ -106,14 +108,14 @@ class AzureOps:
         if len(container_app_env_names) > 0:
             env_name = container_app_env_names[0]
             print("container apps env already exists")
-            env = self.containerManagement.getContainerAppsEnv(rg_name, env_name)
+            env = self.containerAppManagement.getContainerAppsEnv(rg_name, env_name)
             if env is None:
                 print("Error in Accessing container apps env")
             else:
                 print("Accessed container apps env")
         else:
             shared_key = self.logAnalyticsMgmt.getSharedKeys(rg_name, workspace_name)
-            env = self.containerManagement.createContainerEnv(rg_name, env_name, location, workspace.customer_id, shared_key)
+            env = self.containerAppManagement.createContainerEnv(rg_name, env_name, location, workspace.customer_id, shared_key)
             if env is None:
                 # TODO: Manage container apps env creation error
                 pass
@@ -165,18 +167,18 @@ class AzureOps:
         if len(app_names) > 0:
             app_name = app_names[0]
             print("container app already exists")
-            app = self.containerManagement.getContainerApp(rg_name, app_name)
+            app = self.containerAppManagement.getContainerApp(rg_name, app_name)
             if app is None:
                 print("Error in Accessing app")
             else:
                 print("Accessed app")
         else:
-            app = self.containerManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, app_name, location)
+            app = self.containerAppManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, app_name, location)
             if app is None:
                 # TODO: Manage container apps env creation error
                 pass
             else:
-                app_url = self.containerManagement.getContainerAppURL(rg_name, app_name)
+                app_url = self.containerAppManagement.getContainerAppURL(rg_name, app_name)
                 blob_storage = self.resourceManagement.get_blobstorage_from_resource_group(os.getenv("AZURE_ADMIN_RESOURCE_GROUP"))
                 print(blob_storage)
                 if(len(blob_storage)>0):
@@ -220,6 +222,9 @@ class AzureOps:
                 principal_id = identity.principal_id
                 self.authManagement.authAccessToACR(principal_id, self.permanent_rg_acr_name, self.permanent_rg_name)
                 self.authManagement.authAccessToRG(principal_id, rg_name)
+                self.containerAppManagement.assign_identity_to_containerapp(rg_name, app_name, identity_name)
+
+                self.containerAppManagement.updateContainerApp(rg_name, app_name, os.getenv("PERMANENT_ACR_NAME"), os.getenv("PERMANENT_IMG_NAME"), os.getenv("PERMANENT_IMG_TAG"), os.getenv("PERMANENT_IMG_LOCATION"), env_name, identity_name)
 
         # AI services
         aiservice_names =  self.get_resource_names_by_type(resources, "Microsoft.CognitiveServices/accounts")
@@ -267,19 +272,21 @@ class AzureOps:
         
 
 def test_create_container_env(azure_ops):
-    azure_ops.containerManagement.createContainerEnv("test", "test-env", "eastus 2")
+    azure_ops.containerAppManagement.createContainerEnv("test", "test-env", "eastus 2")
 
 
 
 
 if __name__ == "__main__":
     azure_ops = AzureOps()
-    azure_ops.authManagement.authAccessToACR(identity_principal_id="1373c93f-a342-419d-b42b-8935860e93df", acr_name="testagent5acrs2kzrdow3y3rq", acr_rg_name="rg-testagent5")
+    azure_ops.containerAppManagement.updateContainerApp("myassistant9", "myassistant9-app", os.getenv("PERMANENT_ACR_NAME"), os.getenv("PERMANENT_IMG_NAME"), os.getenv("PERMANENT_IMG_TAG"), os.getenv("PERMANENT_IMG_LOCATION"), "myassistant9-env", "myassistant9-identity")
+
+    #azure_ops.authManagement.authAccessToACR(identity_principal_id="1373c93f-a342-419d-b42b-8935860e93df", acr_name="testagent5acrs2kzrdow3y3rq", acr_rg_name="rg-testagent5")
     #azure_ops.provision_resources("test")
     #azure_ops.resourceManagement.list_resource_groups()
     #azure_ops.resourceManagement.createResourceGroup("test", "westeurope")
     #azure_ops.resourceManagement.list_resource_groups()
     #azure_ops.storageManagement.createStorageAccount("test", "ppooeejdhgsfsd", "westeurope")
-    #print(azure_ops.containerManagement.getContainerAppURL("rg-testagent5", "capps-backend-s2kzrdow3y3rq"))
+    #print(azure_ops.containerAppManagement.getContainerAppURL("rg-testagent5", "capps-backend-s2kzrdow3y3rq"))
     #test_create_container_env(azure_ops)
     #azure_ops.logAnalyticsMgmt.test_getSharedKeys("test", "test-log-analytics")
