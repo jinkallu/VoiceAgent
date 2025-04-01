@@ -221,7 +221,7 @@ class AzureOps:
             else:
                 principal_id = identity.principal_id
                 self.authManagement.authAccessToACR(principal_id, self.permanent_rg_acr_name, self.permanent_rg_name)
-                #self.authManagement.authAccessToRG(principal_id, rg_name)
+                self.authManagement.authAccessToRG(principal_id, rg_name)
                 self.authManagement.authAccessToStorage(principal_id, rg_name, storage_account_name)
                 self.containerAppManagement.assign_identity_to_containerapp(rg_name, app_name, identity_name)
                 env_vars = [
