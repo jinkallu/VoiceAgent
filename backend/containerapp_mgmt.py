@@ -11,6 +11,7 @@ from azure.mgmt.appcontainers.models import (
     ContainerResources,
     EnvironmentVar,
     ManagedServiceIdentity, ManagedServiceIdentityType
+    
 )
 from azure.core.exceptions import ResourceNotFoundError
 
@@ -95,6 +96,9 @@ class ContainerAppManagement:
             },
             tags={
                 "env": "dev"
+            },
+            identity={
+                "type": "SystemAssigned"  # Enable System-Assigned Managed Identity
             }
         )
 
@@ -166,18 +170,20 @@ class ContainerAppManagement:
             registries = [
                 {
                     "server": f"{new_acr_name}.azurecr.io",  # ACR server address
-                    "username": "",  # Leave empty if using Managed Identity
-                    "passwordSecretRef": "",  # Can provide secret reference if necessary
-                    "identity": f"/subscriptions/{self.AZURE_SUBSCRIPTION_ID}/resourceGroups/{rg_name}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identity_name}"
+                    #"username": "",  # Leave empty if using Managed Identity
+                    #"passwordSecretRef": "",  # Can provide secret reference if necessary
+                    #"identity": f"/subscriptions/{self.AZURE_SUBSCRIPTION_ID}/resourceGroups/{rg_name}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identity_name}"
+                    "identity": {
+                        "type": "SystemAssigned",  # If you are using UserAssigned Identity, otherwise use SystemAssigned
+                        
+                        "principal_id": "5e109c69-9f72-4ab0-a239-67099e1346fb"  # Directly pass the principalId here
+                    }
                 }
             ]
 
             # Define Managed Identity
             managed_identity = ManagedServiceIdentity(
-                type="UserAssigned",
-                user_assigned_identities={
-                    f"/subscriptions/{self.AZURE_SUBSCRIPTION_ID}/resourceGroups/{rg_name}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identity_name}": {}
-                }
+                type="SystemAssigned"  # Use SystemAssigned for system-assigned identity
             )
 
             # Define the template for the container app
@@ -186,7 +192,9 @@ class ContainerAppManagement:
             )
             # Define the container app configuration, including the registry
             configuration = Configuration(
-                registries=registries  # Add registry configuration to the container app configuration
+                registries=registries,  # Add registry configuration to the container app configuration
+                ingress=Ingress(external=True, target_port=80),
+                active_revisions_mode="Single",
             )
 
             environment_id = f"/subscriptions/{self.AZURE_SUBSCRIPTION_ID}/resourceGroups/{rg_name}/providers/Microsoft.App/managedEnvironments/{environment_name}"

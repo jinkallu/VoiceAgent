@@ -302,30 +302,31 @@ def test_create_container_env(azure_ops):
 
 if __name__ == "__main__":
     azure_ops = AzureOps()
-    azure_ops.authManagement.authAccessToStorage("f24636bc-e888-4ddc-b222-ba55e8083b73", "myassistant14", "myassistant14d8ccj")
-    # env_vars = [
-    #                 {
-    #                     "name": "AZURE_OPENAI_ENDPOINT",
-    #                     "value": os.getenv("AZURE_OPENAI_ENDPOINT")
-    #                 },
-    #                 {
-    #                     "name": "AZURE_OPENAI_REALTIME_DEPLOYMENT",
-    #                     "value": os.getenv("AZURE_OPENAI_REALTIME_DEPLOYMENT")
-    #                 },
-    #                 {
-    #                     "name": "AZURE_OPENAI_REALTIME_VOICE_CHOICE",
-    #                     "value": os.getenv("AZURE_OPENAI_REALTIME_VOICE_CHOICE")
-    #                 },
-    #                 {
-    #                     "name": "AZURE_TENANT_ID",
-    #                     "value": os.getenv("AZURE_TENANT_ID")
-    #                 },
-    #                 {
-    #                     "name": "AZURE_STORAGE_ENDPOINT",
-    #                     "value": os.getenv("AZURE_STORAGE_ENDPOINT")
-    #                 },
-    #             ]
-    # azure_ops.containerAppManagement.updateContainerApp("myassistant13", "myassistant13-app", os.getenv("PERMANENT_ACR_NAME"), os.getenv("PERMANENT_IMG_NAME"), os.getenv("PERMANENT_IMG_TAG"), os.getenv("PERMANENT_IMG_LOCATION"), "myassistant13-env", "myassistant13-identity", env_vars)
+    #print(azure_ops.containerAppManagement.createContainerApp("c5ad8acd-d3b5-4357-beae-caeff17c2d82", "myassistant17", "myassistant17-env", "testapp1", "east us 2").identity.principal_id)
+    # azure_ops.authManagement.authAccessToStorage("f24636bc-e888-4ddc-b222-ba55e8083b73", "myassistant14", "myassistant14d8ccj")
+    env_vars = [
+                    {
+                        "name": "AZURE_OPENAI_ENDPOINT",
+                        "value": os.getenv("AZURE_OPENAI_ENDPOINT")
+                    },
+                    {
+                        "name": "AZURE_OPENAI_REALTIME_DEPLOYMENT",
+                        "value": os.getenv("AZURE_OPENAI_REALTIME_DEPLOYMENT")
+                    },
+                    {
+                        "name": "AZURE_OPENAI_REALTIME_VOICE_CHOICE",
+                        "value": os.getenv("AZURE_OPENAI_REALTIME_VOICE_CHOICE")
+                    },
+                    {
+                        "name": "AZURE_TENANT_ID",
+                        "value": os.getenv("AZURE_TENANT_ID")
+                    },
+                    {
+                        "name": "AZURE_STORAGE_ENDPOINT",
+                        "value": os.getenv("AZURE_STORAGE_ENDPOINT")
+                    },
+                ]
+    print(azure_ops.containerAppManagement.updateContainerApp("myassistant17", "testapp1", os.getenv("PERMANENT_ACR_NAME"), os.getenv("PERMANENT_IMG_NAME"), os.getenv("PERMANENT_IMG_TAG"), os.getenv("PERMANENT_IMG_LOCATION"), "myassistant17-env", "myassistant17-identity", env_vars))
 
     #azure_ops.authManagement.authAccessToACR(identity_principal_id="1373c93f-a342-419d-b42b-8935860e93df", acr_name="testagent5acrs2kzrdow3y3rq", acr_rg_name="rg-testagent5")
     #azure_ops.provision_resources("test")
