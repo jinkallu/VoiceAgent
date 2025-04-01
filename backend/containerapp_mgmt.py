@@ -134,7 +134,7 @@ class ContainerAppManagement:
 
 
 
-    def updateContainerApp(self, rg_name, app_name, new_acr_name, new_image_name, new_image_tag, location, environment_name, identity_name):
+    def updateContainerApp(self, rg_name, app_name, new_acr_name, new_image_name, new_image_tag, location, environment_name, identity_name, e_vars):
         # Step 2: Get the existing container app
         existing_app = self.containerapp_client.container_apps.get(rg_name, app_name)
 
@@ -142,12 +142,24 @@ class ContainerAppManagement:
             # Step 3: Update the image URL
             new_image_url = f"{new_acr_name}.azurecr.io/{new_image_name}:{new_image_tag}"
 
+            # Define the environment variables to pass to your container
+            env_vars = []
+            for var in e_vars:
+                env_vars.append(
+                    EnvironmentVar(
+                        name=var["name"],  # The name of the environment variable
+                        value=var["value"]  # The value of the environment variable
+                    )
+                )
+
+
             # Step 4: Update the container app's configuration with the new image
             # Prepare the containers configuration
             containers = [Container(
                 name=existing_app.name,  # Keep the same name
                 image=new_image_url,  # Set the new image URL
-                resources=existing_app.template.containers[0].resources  # Keep the same resources
+                resources=existing_app.template.containers[0].resources,  # Keep the same resources
+                env=env_vars  # Pass environment variables here
             )]
 
             # Define the registry information (ACR)
