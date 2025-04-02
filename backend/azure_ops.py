@@ -224,11 +224,28 @@ class AzureOps:
         #         # TODO: Manage container registry creation error
         #         pass
 
+        # Speach to text whisperCPP
+        # copy container image from public registry to azure registry first
+        # az acr import -n testagent5acrs2kzrdow3y3rq --source ghcr.io/ggerganov/whisper.cpp:main -t testagent5acrs2kzrdow3y3rq.azurecr.io/stt:main                   
+        # Then create a container app
+        stt_app_name = f"{rg_name}-stt-app"
+        stt_app = None
+        stt_app_url = None
+        env_vars = []
+        command = ["build/bin/whisper-server", "--host", "0.0.0.0", "-lpt", "-0.5"]
+        stt_app = azure_ops.containerAppManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, stt_app_name, location, identity_name, os.getenv("PERMANENT_ACR_NAME"), "stt", "main", [], 8080, False, command)
+        if stt_app is None:
+                # TODO: Manage container app creation error
+                pass
+        else:
+            stt_app_url = f"{self.containerAppManagement.getContainerAppURL(rg_name, stt_app_name)}/inference"
+
         #Container App
         app_names = self.get_resource_names_by_type(resources, "Microsoft.App/containerApps")
         app_name = f"{rg_name}-app"
         app = None
-        if len(app_names) > 0:
+        #if len(app_names) > 0: # TODO:
+        if app:
             app_name = app_names[0]
             print("container app already exists")
             app = self.containerAppManagement.getContainerApp(rg_name, app_name)
@@ -264,10 +281,10 @@ class AzureOps:
                             },
                             {
                                 "name": "WHISPER_STT_URL",
-                                "value": os.getenv("WHISPER_STT_URL")
+                                "value": stt_app_url
                             },
                         ]
-            app = self.containerAppManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, app_name, location, identity_name, os.getenv("PERMANENT_ACR_NAME"), os.getenv("PERMANENT_IMG_NAME"), os.getenv("PERMANENT_IMG_TAG"), env_vars)
+            app = self.containerAppManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, app_name, location, identity_name, os.getenv("PERMANENT_ACR_NAME"), os.getenv("PERMANENT_IMG_NAME"), os.getenv("PERMANENT_IMG_TAG"), env_vars, 8000, True)
             if app is None:
                 # TODO: Manage container apps env creation error
                 pass
@@ -294,8 +311,8 @@ class AzureOps:
                         else:
                             print("Erorr, resourceGroups length")
 
-
         
+
         # AI services
         aiservice_names =  self.get_resource_names_by_type(resources, "Microsoft.CognitiveServices/accounts")
         aiservice_name = f"{rg_name}OAI"
@@ -349,7 +366,10 @@ def test_create_container_env(azure_ops):
 
 if __name__ == "__main__":
     azure_ops = AzureOps()
-    azure_ops.provision_resources("myassistant28", "test1")
+    #azure_ops.provision_resources("myassistant28", "test1")
+    command = ["build/bin/whisper-server", "--host", "0.0.0.0", "-lpt", "-0.5"]
+    app = azure_ops.containerAppManagement.createContainerApp("c5ad8acd-d3b5-4357-beae-caeff17c2d82", "myassistant27", "myassistant27-env", "myassistant27-stt", "east us 2", "myassistant27-identity", os.getenv("PERMANENT_ACR_NAME"), "stt", "main", [], 8080, False, command)
+
     #print(azure_ops.containerAppManagement.createContainerApp("c5ad8acd-d3b5-4357-beae-caeff17c2d82", "myassistant17", "myassistant17-env", "testapp1", "east us 2").identity.principal_id)
     # azure_ops.authManagement.authAccessToStorage("f24636bc-e888-4ddc-b222-ba55e8083b73", "myassistant14", "myassistant14d8ccj")
     # env_vars = [

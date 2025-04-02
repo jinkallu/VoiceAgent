@@ -69,7 +69,7 @@ class ContainerAppManagement:
         except ResourceNotFoundError:
             print(f"Container App '{app_name}' does not exist.")
 
-    def createContainerApp(self, subscription_id, rg_name, env_name, app_name, location, identity_name, acr_name, image_name, image_tag, e_vars):
+    def createContainerApp(self, subscription_id, rg_name, env_name, app_name, location, identity_name, acr_name, image_name, image_tag, e_vars, target_port, external, command=None):
 
         image_url = f"{acr_name}.azurecr.io/{image_name}:{image_tag}"
         env_vars = []
@@ -97,6 +97,7 @@ class ContainerAppManagement:
                         name="mycontainer",
                         image = image_url,
                         env=env_vars,
+                        command=command,
                         resources= ContainerResources(cpu = 1.0, memory= "2Gi"),
                     )
                 ],
@@ -104,8 +105,8 @@ class ContainerAppManagement:
             ),
             configuration=Configuration(
                 ingress= Ingress(
-                    external=True,
-                    target_port=8000,
+                    external=external,
+                    target_port=target_port,
                 ),
                 active_revisions_mode= "Single",
                 registries = [
