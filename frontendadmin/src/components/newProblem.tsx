@@ -2,17 +2,25 @@ import { useEffect, useState } from "react";
 import { IStep, ITSList } from "../interfaces/generic";
 import Button from "./UI/button/Button";
 import { Icon } from "@iconify/react";
+import ResourceItem from "./resourceItem";
+import { removeResource, uploadImage } from "../services/apiService";
+import { useAdminStore } from "../store/zustand/store";
+import Modal from "./UI/modal/Modal";
+import ImageHandler from "./imageHandler";
 interface props {
   addTSStep: (val: ITSList) => void;
   setNewProblem: (val: boolean) => void;
   data?: ITSList | null;
+  productName: string | "";
 }
 
-function NewProblem({ addTSStep, setNewProblem, data }: props) {
+function NewProblem({ productName, addTSStep, setNewProblem, data }: props) {
   const [tsStep, setTSStep] = useState<ITSList>();
   // const [steps, setSteps] = useState<IStep[]>([]);
+  const [isAddImageOpen, setIsAddImageOpen] = useState<boolean>(false);
   const [problem, setProblem] = useState("");
   const [step, setStep] = useState<string>("");
+  const token = useAdminStore((state) => state.token);
   const addProblem = (problem: string) => {
     setTSStep((prev) => {
       return { problem, steps: prev?.steps || [] };
@@ -46,6 +54,61 @@ function NewProblem({ addTSStep, setNewProblem, data }: props) {
       return newTSStep;
     });
     setStep("");
+  };
+  const uploadSelectedImage = async (
+    formData: FormData,
+    fileName: string,
+    step: string
+  ) => {
+    formData.append("product_name", productName);
+    const res = await uploadImage(token, formData);
+    if (res === true) {
+      const newTSList = { ...tsStep };
+      const newSteps = newTSList?.steps?.map((item) => {
+        if (item.step === step) {
+          return { ...item, resource: { type: "image", fileName: fileName } };
+        }
+
+        return item;
+      });
+      console.log(newSteps);
+
+      if (tsStep?.problem) {
+        const newTSStep = { ...tsStep, steps: newSteps || [] };
+        setTSStep(newTSStep);
+
+        addTSStep(newTSStep);
+      }
+
+      console.log(res);
+    }
+    setIsAddImageOpen(false);
+  };
+  const removeResourceFromStep = async (
+    token: string,
+    problem: string,
+    step: string,
+    productName: string,
+    resource: any
+  ) => {
+    const newTSList = { ...tsStep };
+    const newSteps = newTSList?.steps?.map((item) => {
+      if (item.step === step) {
+        return { ...item, resource: null };
+      }
+
+      return item;
+    });
+    console.log(newSteps);
+
+    if (tsStep?.problem) {
+      const newTSStep = { ...tsStep, steps: newSteps || [] };
+      setTSStep(newTSStep);
+
+      addTSStep(newTSStep);
+    }
+
+    // removeResource(token, productName, resource);
   };
   useEffect(() => {
     if (data) setTSStep(data);
@@ -121,24 +184,59 @@ function NewProblem({ addTSStep, setNewProblem, data }: props) {
             <div
               style={{
                 display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
+                flexDirection: "column",
+
                 boxShadow: "2px 2px lightblue",
-                padding: "5px",
               }}
               key={step.step}
             >
               <div
-                style={{ display: "flex", alignItems: "center", gap: "5px" }}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "5px",
+                }}
               >
-                <h5>{index + 1}.</h5>
-                <h5>{step.step}</h5>
-              </div>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
+                >
+                  <h5>{index + 1}.</h5>
+                  <h5>{step.step}</h5>
+                </div>
+                <ResourceItem
+                  productName={productName}
+                  resource={step.resource}
+                  expanded={true}
+                ></ResourceItem>
+                <button
+                  onClick={() =>
+                    removeResourceFromStep(
+                      token,
+                      tsStep.problem,
+                      step.step,
+                      productName,
+                      step.resource
+                    )
+                  }
+                >
+                  Remove Image
+                </button>
+                <button onClick={() => setIsAddImageOpen(true)}>
+                  Change/Add Image
+                </button>
 
-              <Icon
-                onClick={() => removeStep(step.step)}
-                icon="material-symbols-light:delete-outline"
-              ></Icon>
+                <Icon
+                  onClick={() => removeStep(step.step)}
+                  icon="material-symbols-light:delete-outline"
+                ></Icon>
+              </div>
+              {isAddImageOpen && (
+                <ImageHandler
+                  step={step.step}
+                  uploadSelectedImage={uploadSelectedImage}
+                ></ImageHandler>
+              )}
             </div>
           ))}
         </div>

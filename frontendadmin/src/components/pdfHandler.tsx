@@ -7,9 +7,20 @@ import { ITSList } from "../interfaces/generic";
 interface props {
   pdfProblems: ITSList[] | [];
   setPdfProblems: (val: ITSList[] | []) => void;
+  isAppendMode: boolean;
+  setIsAppendMode: (val: boolean) => void;
+  setProductData: (val: ITSList[]) => void;
+  productData: ITSList[];
 }
 
-function PDFHandler({ pdfProblems, setPdfProblems }: props) {
+function PDFHandler({
+  pdfProblems,
+  setPdfProblems,
+  productData,
+  isAppendMode,
+  setIsAppendMode,
+  setProductData,
+}: props) {
   const [selectedFile, setSelectedFile] = useState<File | null>();
   const token = useAdminStore((state) => state.token);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,9 +59,12 @@ function PDFHandler({ pdfProblems, setPdfProblems }: props) {
             item?.steps?.map((stepItem: string) => ({ step: stepItem })) || [];
           return { problem: item.problem, steps: newSteps };
         });
-        setPdfProblems(newData);
-      } else {
-        console.log("else", res);
+        if (isAppendMode) {
+          setProductData([...productData, ...newData]);
+        } else {
+          setProductData(newData);
+        }
+        // setPdfProblems(newData);
       }
     }
 
@@ -69,7 +83,12 @@ function PDFHandler({ pdfProblems, setPdfProblems }: props) {
         accept="application/pdf"
       ></input>
       <Button onClick={onFileUpload}>Upload</Button>
-
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <Button outline onClick={() => setIsAppendMode(!isAppendMode)}>
+          Choose Mode
+        </Button>
+        <h3>{isAppendMode ? "Append" : "Overwrite"}</h3>
+      </div>
       {isLoading && <LoadingSpinner></LoadingSpinner>}
 
       {isLoading && (

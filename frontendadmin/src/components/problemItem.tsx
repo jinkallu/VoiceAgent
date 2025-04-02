@@ -57,7 +57,7 @@ function ProblemItem({ tsStep, productName }: props) {
         >
           <tbody>
             {tsStep?.steps?.map((item) => (
-              <tr style={{ boxShadow: "5px 5px lightblue" }}>
+              <tr style={{ boxShadow: "5px 5px lightblue" }} key={item.step}>
                 <td
                   style={{
                     width: "80%",
@@ -69,11 +69,13 @@ function ProblemItem({ tsStep, productName }: props) {
                   {item.step}
                 </td>
                 <td style={{ width: "100px" }}>
-                  <ResourceItem
-                    resource={item.resource}
-                    productName={productName}
-                    expanded={expanded}
-                  ></ResourceItem>
+                  {item?.resource && (
+                    <ResourceItem
+                      resource={item.resource}
+                      productName={productName}
+                      expanded={expanded}
+                    ></ResourceItem>
+                  )}
                 </td>
               </tr>
             ))}

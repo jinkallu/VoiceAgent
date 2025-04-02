@@ -11,34 +11,21 @@ import { useAdminStore } from "../../../store/zustand/store";
 
 const CustomTable: React.FC<Props> = (props) => {
   const [showModal, setShowModal] = useState(false);
-  const setCurrentProduct = useAdminStore((state) => state.setCurrentProduct);
   function showModalHandler() {
     setShowModal((prev) => !prev);
   }
   function tableBody(item: complex, index: number) {
     /* type guard (in typescript) */
     return (
-      <tr key={index}>
+      <tr style={{ cursor: "pointer" }} key={index}>
         <td>{item.ID}</td>
-        <td className={classes.product_name}>{item.product}</td>
+        <td className={classes.product_name}>
+          <Link to={`/products/${item.product}`}>{item.product}</Link>
+        </td>
         <td className={classes.actions}>
-          <Icon icon="charm:menu-kebab" />
-          <div className={classes.actions__box}>
-            <div className={classes.actions__delete} onClick={showModalHandler}>
-              <Icon icon="fluent:delete-24-regular" width="24" />
-            </div>
-            <div className={classes.actions__edit}>
-              <Link to={`/products/${item.product}`}>
-                <Icon
-                  onClick={() =>
-                    setCurrentProduct({ ID: item.ID, product: item.product })
-                  }
-                  icon="fluent:edit-16-regular"
-                  width="24"
-                />
-              </Link>
-            </div>
-          </div>
+          <Link to={`/products/${item.product}`}>
+            <Icon icon="hugeicons:view" width="24" />
+          </Link>
         </td>
       </tr>
     );

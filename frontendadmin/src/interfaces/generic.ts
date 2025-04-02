@@ -1,6 +1,6 @@
 export interface ITSList {
   problem: string;
-  steps: IStep[];
+  steps: IStep[] | [];
 }
 
 export interface IStep {
