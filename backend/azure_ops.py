@@ -244,7 +244,18 @@ class AzureOps:
                                 "name": "AZURE_STORAGE_ENDPOINT",
                                 "value": f"https://{storage_account_name}.blob.core.windows.net"
                             },
-                            {"name": "AZURE_CLIENT_ID", "value": identity.client_id},
+                            {
+                                "name": "AZURE_CLIENT_ID", 
+                                "value": identity.client_id
+                            },
+                            {
+                                "name": "KOKORO_TTS_URL",
+                                "value": os.getenv("KOKORO_TTS_URL")
+                            },
+                            {
+                                "name": "WHISPER_STT_URL",
+                                "value": os.getenv("WHISPER_STT_URL")
+                            },
                         ]
             app = self.containerAppManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, app_name, location, identity_name, os.getenv("PERMANENT_ACR_NAME"), os.getenv("PERMANENT_IMG_NAME"), os.getenv("PERMANENT_IMG_TAG"), env_vars)
             if app is None:
@@ -328,7 +339,7 @@ def test_create_container_env(azure_ops):
 
 if __name__ == "__main__":
     azure_ops = AzureOps()
-    azure_ops.provision_resources("myassistant19", "test1")
+    azure_ops.provision_resources("myassistant21", "test1")
     #print(azure_ops.containerAppManagement.createContainerApp("c5ad8acd-d3b5-4357-beae-caeff17c2d82", "myassistant17", "myassistant17-env", "testapp1", "east us 2").identity.principal_id)
     # azure_ops.authManagement.authAccessToStorage("f24636bc-e888-4ddc-b222-ba55e8083b73", "myassistant14", "myassistant14d8ccj")
     # env_vars = [
