@@ -187,6 +187,18 @@ class AzureOps:
                 pass
             else:
                 self.authManagement.authAccessToStorage(identity.principal_id, rg_name, storage_account_name)
+                blobOps = BlobOps()
+                blobOps.setBlobServiceClient(storage_account_name)
+                blobOps.createContainerIfNotExists(os.getenv("LOG_CONTAINER"))
+                default_prd_container = os.getenv("DEFAULT_PRODUCT_CONTAINER") # TODO: manage it in env
+                if blobOps.createContainerIfNotExists(default_prd_container):
+                    blobOps.setContainerClient(default_prd_container)
+                    blob_name = os.getenv("PRODUCT_DATA_FILE_NAME")  # Name of the blob you're uploading
+                    file_path = os.getenv("DEFAULT_PRODUCT_DATA_PATH")  # Local path to your JSON file
+                    print(file_path)
+                    with open(file_path, "rb") as data:
+                        print('File opened')
+                        blobOps.createOrUpdateBlob(blob_name, data)
 
         # # container registry
         # registry_names = self.get_resource_names_by_type(resources, "Microsoft.ContainerRegistry/registries")
@@ -237,16 +249,12 @@ class AzureOps:
                                 "value": os.getenv("AZURE_OPENAI_REALTIME_VOICE_CHOICE")
                             },
                             {
-                                "name": "AZURE_TENANT_ID",
-                                "value": os.getenv("AZURE_TENANT_ID")
+                                "name": "AZURE_CLIENT_ID", 
+                                "value": identity.client_id
                             },
                             {
                                 "name": "AZURE_STORAGE_ENDPOINT",
                                 "value": f"https://{storage_account_name}.blob.core.windows.net"
-                            },
-                            {
-                                "name": "AZURE_CLIENT_ID", 
-                                "value": identity.client_id
                             },
                             {
                                 "name": "KOKORO_TTS_URL",
@@ -339,7 +347,7 @@ def test_create_container_env(azure_ops):
 
 if __name__ == "__main__":
     azure_ops = AzureOps()
-    azure_ops.provision_resources("myassistant21", "test1")
+    azure_ops.provision_resources("myassistant25", "test1")
     #print(azure_ops.containerAppManagement.createContainerApp("c5ad8acd-d3b5-4357-beae-caeff17c2d82", "myassistant17", "myassistant17-env", "testapp1", "east us 2").identity.principal_id)
     # azure_ops.authManagement.authAccessToStorage("f24636bc-e888-4ddc-b222-ba55e8083b73", "myassistant14", "myassistant14d8ccj")
     # env_vars = [

@@ -105,7 +105,7 @@ class ContainerAppManagement:
             configuration=Configuration(
                 ingress= Ingress(
                     external=True,
-                    target_port=80,
+                    target_port=8000,
                 ),
                 active_revisions_mode= "Single",
                 registries = [
