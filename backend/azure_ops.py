@@ -100,6 +100,54 @@ class AzureOps:
                 # TODO: Manage workspace creation error
                 pass
 
+        # Create managed identity
+        identity_names = self.get_resource_names_by_type(resources, "Microsoft.ManagedIdentity/userAssignedIdentities")
+        identity_name = f"{rg_name}-identity"
+        identity = None
+        if len(identity_names) > 0:
+            identity_name = identity_names[0]
+            print("Identity already exists")
+            identity = self.identityManagement.getManagedIdentity(rg_name, identity_name)
+            if identity is None:
+                print("Error in Accessing identity")
+            else:
+                print("Accessed identity")
+        else:
+            identity = self.identityManagement.createManagedIdentity(rg_name, identity_name, location)
+            if identity is None:
+                # TODO: Manage identity creation error
+                pass
+            else:
+                principal_id = identity.principal_id
+                self.authManagement.authAccessToACR(principal_id, self.permanent_rg_acr_name, self.permanent_rg_name)
+                #self.authManagement.authAccessToRG(principal_id, rg_name)
+                #self.authManagement.authAccessToStorage(principal_id, rg_name, storage_account_name)
+                # self.containerAppManagement.assign_identity_to_containerapp(rg_name, app_name, identity_name)
+                # env_vars = [
+                #     {
+                #         "name": "AZURE_OPENAI_ENDPOINT",
+                #         "value": os.getenv("AZURE_OPENAI_ENDPOINT")
+                #     },
+                #     {
+                #         "name": "AZURE_OPENAI_REALTIME_DEPLOYMENT",
+                #         "value": os.getenv("AZURE_OPENAI_REALTIME_DEPLOYMENT")
+                #     },
+                #     {
+                #         "name": "AZURE_OPENAI_REALTIME_VOICE_CHOICE",
+                #         "value": os.getenv("AZURE_OPENAI_REALTIME_VOICE_CHOICE")
+                #     },
+                #     {
+                #         "name": "AZURE_TENANT_ID",
+                #         "value": os.getenv("AZURE_TENANT_ID")
+                #     },
+                #     {
+                #         "name": "AZURE_STORAGE_ENDPOINT",
+                #         "value": f"https://{storage_account_name}.blob.core.windows.net"
+                #     },
+                    
+                # ]
+                # self.containerAppManagement.updateContainerApp(rg_name, app_name, os.getenv("PERMANENT_ACR_NAME"), os.getenv("PERMANENT_IMG_NAME"), os.getenv("PERMANENT_IMG_TAG"), os.getenv("PERMANENT_IMG_LOCATION"), env_name, identity_name, env_vars)
+
         
         container_app_env_names = self.get_resource_names_by_type(resources, "Microsoft.App/managedEnvironments")    
         # Create Container Apps Env
@@ -137,28 +185,30 @@ class AzureOps:
             if storage_account is None:
                 # TODO: Manage storage account creation error
                 pass
-
-        # container registry
-        registry_names = self.get_resource_names_by_type(resources, "Microsoft.ContainerRegistry/registries")
-        registry_name = None
-        registry = None
-        if len(registry_names) > 0:
-            registry_name = registry_names[0]
-            print("container registry already exists")
-            registry = self.containerRegistryMgmt.getContainerRegistry(rg_name, registry_name)
-            if registry is None:
-                print("Error in Accessing container registry")
             else:
-                print("Accessed container registry")
-        else:
-            for i in range(10):
-                registry_name = rg_name + self.generate_random_alphanumeric(5)
-                if self.containerRegistryMgmt.nameAvailable(registry_name):
-                    break
-            registry = self.containerRegistryMgmt.createContainerRegistry(rg_name, registry_name, location)
-            if registry is None:
-                # TODO: Manage container registry creation error
-                pass
+                self.authManagement.authAccessToStorage(identity.principal_id, rg_name, storage_account_name)
+
+        # # container registry
+        # registry_names = self.get_resource_names_by_type(resources, "Microsoft.ContainerRegistry/registries")
+        # registry_name = None
+        # registry = None
+        # if len(registry_names) > 0:
+        #     registry_name = registry_names[0]
+        #     print("container registry already exists")
+        #     registry = self.containerRegistryMgmt.getContainerRegistry(rg_name, registry_name)
+        #     if registry is None:
+        #         print("Error in Accessing container registry")
+        #     else:
+        #         print("Accessed container registry")
+        # else:
+        #     for i in range(10):
+        #         registry_name = rg_name + self.generate_random_alphanumeric(5)
+        #         if self.containerRegistryMgmt.nameAvailable(registry_name):
+        #             break
+        #     registry = self.containerRegistryMgmt.createContainerRegistry(rg_name, registry_name, location)
+        #     if registry is None:
+        #         # TODO: Manage container registry creation error
+        #         pass
 
         #Container App
         app_names = self.get_resource_names_by_type(resources, "Microsoft.App/containerApps")
@@ -173,7 +223,30 @@ class AzureOps:
             else:
                 print("Accessed app")
         else:
-            app = self.containerAppManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, app_name, location)
+            env_vars = [
+                            {
+                                "name": "AZURE_OPENAI_ENDPOINT",
+                                "value": os.getenv("AZURE_OPENAI_ENDPOINT")
+                            },
+                            {
+                                "name": "AZURE_OPENAI_REALTIME_DEPLOYMENT",
+                                "value": os.getenv("AZURE_OPENAI_REALTIME_DEPLOYMENT")
+                            },
+                            {
+                                "name": "AZURE_OPENAI_REALTIME_VOICE_CHOICE",
+                                "value": os.getenv("AZURE_OPENAI_REALTIME_VOICE_CHOICE")
+                            },
+                            {
+                                "name": "AZURE_TENANT_ID",
+                                "value": os.getenv("AZURE_TENANT_ID")
+                            },
+                            {
+                                "name": "AZURE_STORAGE_ENDPOINT",
+                                "value": f"https://{storage_account_name}.blob.core.windows.net"
+                            },
+                            {"name": "AZURE_CLIENT_ID", "value": identity.client_id},
+                        ]
+            app = self.containerAppManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, app_name, location, identity_name, os.getenv("PERMANENT_ACR_NAME"), os.getenv("PERMANENT_IMG_NAME"), os.getenv("PERMANENT_IMG_TAG"), env_vars)
             if app is None:
                 # TODO: Manage container apps env creation error
                 pass
@@ -201,54 +274,7 @@ class AzureOps:
                             print("Erorr, resourceGroups length")
 
 
-        # Create managed identity
-        identity_names = self.get_resource_names_by_type(resources, "Microsoft.ManagedIdentity/userAssignedIdentities")
-        identity_name = f"{rg_name}-identity"
-        identity = None
-        if len(identity_names) > 0:
-            identity_name = identity_names[0]
-            print("Identity already exists")
-            identity = self.identityManagement.getManagedIdentity(rg_name, identity_name)
-            if identity is None:
-                print("Error in Accessing identity")
-            else:
-                print("Accessed identity")
-        else:
-            identity = self.identityManagement.createManagedIdentity(rg_name, identity_name, location)
-            if identity is None:
-                # TODO: Manage identity creation error
-                pass
-            else:
-                principal_id = identity.principal_id
-                self.authManagement.authAccessToACR(principal_id, self.permanent_rg_acr_name, self.permanent_rg_name)
-                self.authManagement.authAccessToRG(principal_id, rg_name)
-                self.authManagement.authAccessToStorage(principal_id, rg_name, storage_account_name)
-                self.containerAppManagement.assign_identity_to_containerapp(rg_name, app_name, identity_name)
-                env_vars = [
-                    {
-                        "name": "AZURE_OPENAI_ENDPOINT",
-                        "value": os.getenv("AZURE_OPENAI_ENDPOINT")
-                    },
-                    {
-                        "name": "AZURE_OPENAI_REALTIME_DEPLOYMENT",
-                        "value": os.getenv("AZURE_OPENAI_REALTIME_DEPLOYMENT")
-                    },
-                    {
-                        "name": "AZURE_OPENAI_REALTIME_VOICE_CHOICE",
-                        "value": os.getenv("AZURE_OPENAI_REALTIME_VOICE_CHOICE")
-                    },
-                    {
-                        "name": "AZURE_TENANT_ID",
-                        "value": os.getenv("AZURE_TENANT_ID")
-                    },
-                    {
-                        "name": "AZURE_STORAGE_ENDPOINT",
-                        "value": f"https://{storage_account_name}.blob.core.windows.net"
-                    },
-                    
-                ]
-                self.containerAppManagement.updateContainerApp(rg_name, app_name, os.getenv("PERMANENT_ACR_NAME"), os.getenv("PERMANENT_IMG_NAME"), os.getenv("PERMANENT_IMG_TAG"), os.getenv("PERMANENT_IMG_LOCATION"), env_name, identity_name, env_vars)
-
+        
         # AI services
         aiservice_names =  self.get_resource_names_by_type(resources, "Microsoft.CognitiveServices/accounts")
         aiservice_name = f"{rg_name}OAI"
@@ -302,31 +328,32 @@ def test_create_container_env(azure_ops):
 
 if __name__ == "__main__":
     azure_ops = AzureOps()
+    azure_ops.provision_resources("myassistant19", "test1")
     #print(azure_ops.containerAppManagement.createContainerApp("c5ad8acd-d3b5-4357-beae-caeff17c2d82", "myassistant17", "myassistant17-env", "testapp1", "east us 2").identity.principal_id)
     # azure_ops.authManagement.authAccessToStorage("f24636bc-e888-4ddc-b222-ba55e8083b73", "myassistant14", "myassistant14d8ccj")
-    env_vars = [
-                    {
-                        "name": "AZURE_OPENAI_ENDPOINT",
-                        "value": os.getenv("AZURE_OPENAI_ENDPOINT")
-                    },
-                    {
-                        "name": "AZURE_OPENAI_REALTIME_DEPLOYMENT",
-                        "value": os.getenv("AZURE_OPENAI_REALTIME_DEPLOYMENT")
-                    },
-                    {
-                        "name": "AZURE_OPENAI_REALTIME_VOICE_CHOICE",
-                        "value": os.getenv("AZURE_OPENAI_REALTIME_VOICE_CHOICE")
-                    },
-                    {
-                        "name": "AZURE_TENANT_ID",
-                        "value": os.getenv("AZURE_TENANT_ID")
-                    },
-                    {
-                        "name": "AZURE_STORAGE_ENDPOINT",
-                        "value": os.getenv("AZURE_STORAGE_ENDPOINT")
-                    },
-                ]
-    print(azure_ops.containerAppManagement.updateContainerApp("myassistant17", "testapp1", os.getenv("PERMANENT_ACR_NAME"), os.getenv("PERMANENT_IMG_NAME"), os.getenv("PERMANENT_IMG_TAG"), os.getenv("PERMANENT_IMG_LOCATION"), "myassistant17-env", "myassistant17-identity", env_vars))
+    # env_vars = [
+    #                 {
+    #                     "name": "AZURE_OPENAI_ENDPOINT",
+    #                     "value": os.getenv("AZURE_OPENAI_ENDPOINT")
+    #                 },
+    #                 {
+    #                     "name": "AZURE_OPENAI_REALTIME_DEPLOYMENT",
+    #                     "value": os.getenv("AZURE_OPENAI_REALTIME_DEPLOYMENT")
+    #                 },
+    #                 {
+    #                     "name": "AZURE_OPENAI_REALTIME_VOICE_CHOICE",
+    #                     "value": os.getenv("AZURE_OPENAI_REALTIME_VOICE_CHOICE")
+    #                 },
+    #                 {
+    #                     "name": "AZURE_TENANT_ID",
+    #                     "value": os.getenv("AZURE_TENANT_ID")
+    #                 },
+    #                 {
+    #                     "name": "AZURE_STORAGE_ENDPOINT",
+    #                     "value": os.getenv("AZURE_STORAGE_ENDPOINT")
+    #                 },
+    #             ]
+    # print(azure_ops.containerAppManagement.updateContainerApp("myassistant17", "testapp1", os.getenv("PERMANENT_ACR_NAME"), os.getenv("PERMANENT_IMG_NAME"), os.getenv("PERMANENT_IMG_TAG"), os.getenv("PERMANENT_IMG_LOCATION"), "myassistant17-env", "myassistant17-identity", env_vars))
 
     #azure_ops.authManagement.authAccessToACR(identity_principal_id="1373c93f-a342-419d-b42b-8935860e93df", acr_name="testagent5acrs2kzrdow3y3rq", acr_rg_name="rg-testagent5")
     #azure_ops.provision_resources("test")

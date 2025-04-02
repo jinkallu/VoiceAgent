@@ -12,7 +12,7 @@ class AuthManagement:
         acr_scope = f"/subscriptions/{self.AZURE_SUBSCRIPTION_ID}/resourceGroups/{acr_rg_name}/providers/Microsoft.ContainerRegistry/registries/{acr_name}"
 
         role_assignment_params = RoleAssignmentCreateParameters(
-            role_definition_id = f"/subscriptions/{self.AZURE_SUBSCRIPTION_ID}/providers/Microsoft.Authorization/roleDefinitions/7f951dda-4ed3-4680-a7ca-43fe172d538d",  # AcrPull role ID
+            role_definition_id = f"/subscriptions/{self.AZURE_SUBSCRIPTION_ID}/providers/Microsoft.Authorization/roleDefinitions/7f951dda-4ed3-4680-a7ca-43fe172d538d",  # 7f951dda-4ed3-4680-a7ca-43fe172d538d AcrPull role ID
             principal_id = identity_principal_id,
             principal_type = PrincipalType.SERVICE_PRINCIPAL  # <--- important!
         )
@@ -31,7 +31,7 @@ class AuthManagement:
 
         role_assignment_params = RoleAssignmentCreateParameters(
             principal_id=identity_principal_id,
-            role_definition_id=f"/subscriptions/{self.AZURE_SUBSCRIPTION_ID}/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",  # Reader role
+            role_definition_id=f"/subscriptions/{self.AZURE_SUBSCRIPTION_ID}/providers/Microsoft.Authorization/roleDefinitions/storageBlobDataReader",  # acdd72a7-3385-48ef-bd42-f606fba81ae7 Reader role
             principal_type=PrincipalType.SERVICE_PRINCIPAL
         )
 
@@ -47,7 +47,7 @@ class AuthManagement:
 
         role_assignment_params = RoleAssignmentCreateParameters(
             principal_id=identity_principal_id,
-            role_definition_id=f"/subscriptions/{self.AZURE_SUBSCRIPTION_ID}/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe",  # "Storage Blob Data Contributor"
+            role_definition_id=f"/subscriptions/{self.AZURE_SUBSCRIPTION_ID}/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe",  # "Storage Blob Data Contributor" ba92f5b4-2d11-453d-a403-e96b0029c9fe
             principal_type="ServicePrincipal"
         )
 

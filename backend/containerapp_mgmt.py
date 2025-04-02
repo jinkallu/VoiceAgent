@@ -69,37 +69,58 @@ class ContainerAppManagement:
         except ResourceNotFoundError:
             print(f"Container App '{app_name}' does not exist.")
 
-    def createContainerApp(self, subscription_id, rg_name, env_name, app_name, location):
+    def createContainerApp(self, subscription_id, rg_name, env_name, app_name, location, identity_name, acr_name, image_name, image_tag, e_vars):
+
+        image_url = f"{acr_name}.azurecr.io/{image_name}:{image_tag}"
+        env_vars = []
+        for var in e_vars:
+            env_vars.append(
+                EnvironmentVar(
+                    name=var["name"],  # The name of the environment variable
+                    value=var["value"]  # The value of the environment variable
+                )
+            )
 
         # Define the container app
         container_app = ContainerApp(
             location=location,  # or your preferred region
+            identity=ManagedServiceIdentity(
+                type=ManagedServiceIdentityType.USER_ASSIGNED,  # Attach User-Assigned Identity
+                user_assigned_identities={
+                    f"/subscriptions/{subscription_id}/resourceGroups/{rg_name}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identity_name}": {}
+                },
+            ),
             environment_id=f"/subscriptions/{subscription_id}/resourceGroups/{rg_name}/providers/Microsoft.App/managedEnvironments/{env_name}",
             template=Template(
                 containers=[
                     Container(
                         name="mycontainer",
-                        image="nginx:latest",  # your container image
-                        env=[
-                            EnvironmentVar(name="ENV_VAR_EXAMPLE", value="value")
-                        ],
+                        image = image_url,
+                        env=env_vars,
+                        resources= ContainerResources(cpu = 1.0, memory= "2Gi"),
                     )
                 ],
                 scale={"min_replicas": 1, "max_replicas": 2}
             ),
-            configuration={
-                "ingress": Ingress(
+            configuration=Configuration(
+                ingress= Ingress(
                     external=True,
                     target_port=80,
                 ),
-                "active_revisions_mode": "Single",
-            },
+                active_revisions_mode= "Single",
+                registries = [
+                    {
+                        "server": f"{acr_name}.azurecr.io",
+                        "identity": f"/subscriptions/{subscription_id}/resourceGroups/{rg_name}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identity_name}"
+                    }
+                ],
+            ),
             tags={
                 "env": "dev"
             },
-            identity={
-                "type": "SystemAssigned"  # Enable System-Assigned Managed Identity
-            }
+            # identity={
+            #     "type": "SystemAssigned"  # Enable System-Assigned Managed Identity
+            # }
         )
 
         try:
