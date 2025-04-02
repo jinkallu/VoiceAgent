@@ -226,7 +226,7 @@ class AzureOps:
 
         # Speach to text whisperCPP
         # copy container image from public registry to azure registry first
-        # az acr import -n testagent5acrs2kzrdow3y3rq --source ghcr.io/ggerganov/whisper.cpp:main -t testagent5acrs2kzrdow3y3rq.azurecr.io/stt:main                   
+        # az acr import -n testagent5acrs2kzrdow3y3rq --source ghcr.io/ggerganov/whisper.cpp:main -t stt:main                   
         # Then create a container app
         stt_app_name = f"{rg_name}-stt-app"
         stt_app = None
@@ -239,6 +239,19 @@ class AzureOps:
                 pass
         else:
             stt_app_url = f"{self.containerAppManagement.getContainerAppURL(rg_name, stt_app_name)}/inference"
+
+        # Text to speach Kokoro
+        # az acr import -n testagent5acrs2kzrdow3y3rq --source testbxrbu.azurecr.io/tts-api:latest -t tts:main
+        tts_app_name = f"{rg_name}-tts-app"
+        tts_app = None
+        tts_app_url = None
+        env_vars = []
+        tts_app = azure_ops.containerAppManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, tts_app_name, location, identity_name, os.getenv("PERMANENT_ACR_NAME"), "tts", "main", [], 80, False)
+        if tts_app is None:
+                # TODO: Manage container app creation error
+                pass
+        else:
+            tts_app_url = self.containerAppManagement.getContainerAppURL(rg_name, tts_app_name)
 
         #Container App
         app_names = self.get_resource_names_by_type(resources, "Microsoft.App/containerApps")
@@ -277,7 +290,7 @@ class AzureOps:
                             },
                             {
                                 "name": "KOKORO_TTS_URL",
-                                "value": os.getenv("KOKORO_TTS_URL")
+                                "value": tts_app_url
                             },
                             {
                                 "name": "WHISPER_STT_URL",
