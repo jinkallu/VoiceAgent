@@ -1,5 +1,5 @@
 from azure.storage.blob import BlobServiceClient
-from azure.identity import AzureDeveloperCliCredential, DefaultAzureCredential
+from azure.identity import ManagedIdentityCredential, DefaultAzureCredential
 from azure.core.exceptions import ResourceExistsError, AzureError
 import os
 import json
@@ -16,12 +16,13 @@ class BlobOps:
 
         
 
-    def setBlobServiceClient(self, storage_name):
-        default_credential = DefaultAzureCredential()
+    def setBlobServiceClient(self, storage_name, credential=None):
+        if not credential:
+            credential = DefaultAzureCredential()
         connection_url = f"https://{storage_name}.blob.core.windows.net"
 
         # Create the BlobServiceClient object
-        self.blob_service_client = BlobServiceClient(connection_url, credential=default_credential)
+        self.blob_service_client = BlobServiceClient(connection_url, credential=credential)
 
     def getContainersList(self):
         containers=self.blob_service_client.list_containers()

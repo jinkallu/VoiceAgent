@@ -1,4 +1,4 @@
-from azure.identity import AzureDeveloperCliCredential, DefaultAzureCredential
+from azure.identity import ManagedIdentityCredential, DefaultAzureCredential
 from resource_mgmt import ResourceManagement
 from storage_mgmt import StorageManagement
 from blob_ops import BlobOps
@@ -9,6 +9,8 @@ from identity_management import IdentityManagement
 from cogni_services_mgmt import CognitiveServicesMgmt
 from auth_mgmt import AuthManagement
 from container_mgmt import ContainerMgmt
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 import random
 import string
@@ -347,7 +349,7 @@ def test_create_container_env(azure_ops):
 
 if __name__ == "__main__":
     azure_ops = AzureOps()
-    azure_ops.provision_resources("myassistant25", "test1")
+    azure_ops.provision_resources("myassistant28", "test1")
     #print(azure_ops.containerAppManagement.createContainerApp("c5ad8acd-d3b5-4357-beae-caeff17c2d82", "myassistant17", "myassistant17-env", "testapp1", "east us 2").identity.principal_id)
     # azure_ops.authManagement.authAccessToStorage("f24636bc-e888-4ddc-b222-ba55e8083b73", "myassistant14", "myassistant14d8ccj")
     # env_vars = [
