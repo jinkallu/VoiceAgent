@@ -1,3 +1,21 @@
+const authenticate = async (username, password) => {
+  try {
+    const response = await fetch("http://127.0.0.1:8000/login/", {
+      method: "POST",
+      body: JSON.stringify({ username, password }),
+      headers: {
+        "Content-Type": "application/json", // <-- Add this!
+      },
+    });
+
+    const data = await response.json();
+    return data;
+  } catch (e) {
+    console.log(e);
+    return;
+  }
+};
+
 const getResourceGroups = async (token) => {
   try {
     const response = await fetch("http://127.0.0.1:8000/resourcegroups/", {
@@ -20,9 +38,9 @@ const createResourceGroup = async (token, res_name) => {
       body: JSON.stringify({
         res_name,
       }),
-      headers: { 
+      headers: {
         "Content-Type": "application/json", // <-- Add this!
-        Authorization: `Bearer ${token}` 
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -193,6 +211,56 @@ const uploadPDF = async (token, formData) => {
   }
 };
 
+const uploadImage = async (token, formData) => {
+  try {
+    const response = await fetch("http://127.0.0.1:8000/upload_image/", {
+      method: "POST",
+      body: formData,
+
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (response.status !== 200) {
+      return { status: response.status, message: "Unauthorized" };
+    } else {
+      const data = await response.json();
+      console.log(data);
+      return data;
+    }
+  } catch (e) {
+    console.log(e);
+    return;
+  }
+};
+
+const removeResource = async (token, product_name, resource) => {
+  try {
+    const response = await fetch("http://127.0.0.1:8000/remove_resource/", {
+      method: "POST",
+      body: JSON.stringify({
+        product_name,
+        type: resource?.type || "",
+        file_name: resource?.fileName || "",
+      }),
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json", // Ensure you're sending JSON
+      },
+    });
+    if (response.status !== 200) {
+      return { status: response.status, message: "Unauthorized" };
+    } else {
+      const data = await response.json();
+      console.log(data);
+      return { status: 200, data };
+    }
+  } catch (e) {
+    console.log(e);
+    return;
+  }
+};
+
 export {
   getResourceGroups,
   createResourceGroup,
@@ -203,4 +271,7 @@ export {
   uploadProductData,
   addProduct,
   uploadPDF,
+  removeResource,
+  uploadImage,
+  authenticate,
 };

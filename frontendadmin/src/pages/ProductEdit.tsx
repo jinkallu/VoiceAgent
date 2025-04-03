@@ -13,7 +13,6 @@ import {
 } from "../services/apiService";
 import ProblemList from "../components/problemList";
 import { ITSList } from "../interfaces/generic";
-import { Icon } from "@iconify/react";
 import Button from "../components/UI/button/Button";
 import Modal from "../components/UI/modal/Modal";
 import NewProblem from "../components/newProblem";
@@ -21,18 +20,17 @@ import PDFHandler from "../components/pdfHandler";
 
 function ProductEdit() {
   const { t } = useTranslation();
-  const params = useParams();
-  let { productId } = params;
-  const currentProduct = useAdminStore((state) => state.currentProduct);
   const token = useAdminStore((state) => state.token);
   const location = useLocation();
-  const [productData, sestProductData] = useState<ITSList[] | []>([]);
-  const [productName, sestProductName] = useState<string>();
+  const [productData, setProductData] = useState<ITSList[] | []>([]);
+  const [loadingProductData, setLoadingProductData] = useState<boolean>(false);
+  const [productName, sestProductName] = useState<string>("");
   const [editable, setEditable] = useState<boolean>(false);
   const [newProblem, setNewProblem] = useState<boolean>(false);
   const [selectedProblem, setSelectedProblem] = useState<ITSList>();
   const [uploadEnabled, setUploadEnabled] = useState<boolean>(false);
   const [pdfProblems, setPdfProblems] = useState<ITSList[] | []>([]);
+  const [isAppendMode, setIsAppendMode] = useState<boolean>(true);
 
   useEffect(() => {
     console.log(pdfProblems);
@@ -55,10 +53,12 @@ function ProductEdit() {
   // }
 
   async function loadDataFromProductName(token: string, product_name: string) {
+    setLoadingProductData(true);
     const data = await getDataFromProductName(token, product_name);
     if (data?.status === 200) {
-      sestProductData(data?.productData || []);
+      setProductData(data?.productData || []);
     }
+    setLoadingProductData(false);
   }
 
   const deleteProblem = async (problem: string) => {
@@ -66,7 +66,7 @@ function ProductEdit() {
       (item) => item.problem !== problem
     );
     uploadProductData(token, productName, newProductData);
-    sestProductData(newProductData);
+    setProductData(newProductData);
   };
   const uploadToAzure = async (productData: ITSList[]) => {
     const res = await uploadProductData(token, productName, productData);
@@ -88,8 +88,9 @@ function ProductEdit() {
       newData.push(tsStep);
     }
     uploadToAzure(newData);
-    sestProductData(newData);
+    setProductData(newData);
   };
+
   const openEditProblem = (data: ITSList) => {
     setSelectedProblem(data);
     setNewProblem(true);
@@ -109,38 +110,59 @@ function ProductEdit() {
           display: "flex",
           justifyContent: "space-around",
           alignItems: "center",
+          width: "100%",
         }}
       >
-        <h2 className="title">{`${editable ? t("editProduct-") : ""}${
-          currentProduct?.product
-        }`}</h2>
-
-        <Button onClick={() => setEditable((prev) => !prev)}>
-          {`${editable ? "Cancel Edit" : "Edit"}`}
-        </Button>
+        <h2 className="title">{`${
+          editable ? t("Edit Product-") : ""
+        }${productName}`}</h2>
       </div>
       {newProblem && (
         <Modal
-          title="New Problem"
+          title={productName}
           onConfirm={() => {
             setNewProblem((prev) => !prev);
           }}
         >
           <NewProblem
+            productName={productName}
             data={selectedProblem}
             addTSStep={addTSStep}
             setNewProblem={setNewProblem}
           ></NewProblem>
         </Modal>
       )}
-      {editable && (
-        <div>
-          <Button onClick={() => setNewProblem(true)}>New Problem</Button>
-          <Button onClick={() => setUploadEnabled(true)}>
-            Import From PDF
+      <div
+        style={{
+          paddingTop: "5px",
+          paddingBottom: "10px",
+          display: "flex",
+          marginBottom: "10px",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          width: "100%",
+        }}
+      >
+        {editable && (
+          <div>
+            <Button onClick={() => setNewProblem(true)}>New Problem</Button>
+            <Button onClick={() => setUploadEnabled(true)}>
+              Import From PDF
+            </Button>
+          </div>
+        )}
+
+        {editable && (
+          <Button outline onClick={() => uploadToAzure(productData)}>
+            Save Changes
           </Button>
-        </div>
-      )}
+        )}
+
+        <Button onClick={() => setEditable((prev) => !prev)}>
+          {`${editable ? "Cancel Edit" : "Edit"}`}
+        </Button>
+      </div>
+
       {uploadEnabled && (
         <Modal
           title="Import From PDF"
@@ -149,11 +171,16 @@ function ProductEdit() {
           }}
         >
           <PDFHandler
+            productData={productData}
+            setProductData={setProductData}
+            isAppendMode={isAppendMode}
+            setIsAppendMode={setIsAppendMode}
             pdfProblems={pdfProblems}
             setPdfProblems={setPdfProblems}
           ></PDFHandler>
         </Modal>
       )}
+      {loadingProductData && <LoadingSpinner></LoadingSpinner>}
       {productData.length > 0 && productName && (
         <ProblemList
           editable={editable}

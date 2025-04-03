@@ -69,14 +69,20 @@ function Products() {
         dropdownData={dropdownOptions}
         onChange={selectedChangeHandler}
       /> */}
-      <CustomTable
-        headData={productsHeader}
-        bodyData={products?.map((item: string, index: number) => ({
-          product: item,
-          ID: index + 1,
-        }))}
-        limit={10}
-      />
+      {products?.length > 0 ? (
+        <CustomTable
+          headData={productsHeader}
+          bodyData={products?.map((item: string, index: number) => ({
+            product: item,
+            ID: index + 1,
+          }))}
+          limit={10}
+        />
+      ) : (
+        <div>
+          <h3>No products to display. Add products to continue</h3>
+        </div>
+      )}
     </section>
   );
 }

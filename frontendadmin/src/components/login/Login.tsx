@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 
 import LoginContext from "../../store/loginContext";
 import langContextObj from "../../store/langContext";
@@ -9,6 +9,8 @@ import { useTranslation } from "react-i18next";
 import classes from "./Login.module.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { useAdminStore } from "../../store/zustand/store";
+import { authenticate } from "../../services/apiService";
+import LoadingSpinner from "../UI/loadingSpinner/LoadingSpinner";
 
 function LoginBox() {
   const loginCtx = useContext(LoginContext);
@@ -16,29 +18,30 @@ function LoginBox() {
   const userNameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const errorMessageRef = useRef<HTMLSpanElement>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
   const setToken = useAdminStore((state) => state.setToken);
+  const setUserName = useAdminStore((state) => state.setUserName);
   const setResourceGroup = useAdminStore((state) => state.setResourceGroup);
 
   async function loginHandler(e: React.FormEvent) {
     e.preventDefault();
-    const response = await fetch("http://127.0.0.1:8000/login/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username: userNameRef.current?.value,
-        password: passwordRef.current?.value,
-      }),
-    });
+    if (!userNameRef.current?.value || !passwordRef.current?.value) {
+      return;
+    }
+    setIsLoading(true);
+    const data = await authenticate(
+      userNameRef.current?.value,
+      passwordRef.current?.value
+    );
 
-    const data = await response.json();
-    console.log(data);
-    if (response.ok && data?.access_token) {
+    if (data?.access_token) {
       console.log(data);
       setToken(data.access_token);
       setResourceGroup(data?.resourceGroups || []);
       localStorage.setItem("token", data.access_token);
+      setUserName(userNameRef.current.value);
       loginCtx.toggleLogin();
       navigate("/");
     } else {
@@ -48,6 +51,7 @@ function LoginBox() {
         "display: inline-block;opacity: 1"
       );
     }
+    setIsLoading(false);
   }
 
   return (
@@ -74,17 +78,18 @@ function LoginBox() {
           </span>
           <Input type={"password"} id={"pass"} value="test" ref={passwordRef} />
           <Button type="submit">{t("login")}</Button>
+          {isLoading && <LoadingSpinner></LoadingSpinner>}
           <Link className={classes.forgat_pass} to="/">
             {t("forgetPass")}
-          </Link>          
+          </Link>
           <div className={classes.checkbox}>
             <input type="checkbox" id="rememberMe" />
             <label htmlFor="rememberMe">{t("rememberMe")}</label>
           </div>
-        </form>       
-          <Link className={classes.forgat_pass} to="/register">
+        </form>
+        <Link className={classes.forgat_pass} to="/register">
           Register
-          </Link> 
+        </Link>
       </div>
 
       <div className={classes.keyPic}>

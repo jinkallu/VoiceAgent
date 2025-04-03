@@ -84,6 +84,19 @@ class BlobOps:
             print(f"❌ Unexpected error: {e}")
 
     
+    def deleteBlob(self, blob_name):
+        try:
+            blob_client = self.container_client.get_blob_client(blob_name)
+            blob_client.delete_blob()
+            # Upload the JSON string
+            return True
+        except AzureError as e:
+            print(f"❌ Azure error occurred: {e}")
+
+        except Exception as e:
+            print(f"❌ Unexpected error: {e}")
+
+    
     def createOrReplaceBlobFromJson(self, blob_name, json_data):
         self.createOrUpdateBlob(blob_name, json_data)
         

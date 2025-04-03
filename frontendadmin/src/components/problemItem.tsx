@@ -20,6 +20,7 @@ function ProblemItem({ tsStep, productName }: props) {
     >
       <div style={{ display: "flex", gap: "5px", marginBottom: "5px" }}>
         <Icon
+          style={{ cursor: "pointer" }}
           onClick={() => setExpanded((prev) => !prev)}
           icon={`${expanded ? "ep:minus" : "ep:plus"}`}
         ></Icon>
@@ -53,11 +54,11 @@ function ProblemItem({ tsStep, productName }: props) {
       </div>
       {expanded && (
         <table
-          style={{ tableLayout: "fixed", width: "80%", marginLeft: "25px" }}
+          style={{ tableLayout: "fixed", width: "100%", marginLeft: "25px" }}
         >
           <tbody>
             {tsStep?.steps?.map((item) => (
-              <tr style={{ boxShadow: "5px 5px lightblue" }}>
+              <tr style={{ boxShadow: "2px 2px lightblue" }} key={item.step}>
                 <td
                   style={{
                     width: "80%",
@@ -69,11 +70,13 @@ function ProblemItem({ tsStep, productName }: props) {
                   {item.step}
                 </td>
                 <td style={{ width: "100px" }}>
-                  <ResourceItem
-                    resource={item.resource}
-                    productName={productName}
-                    expanded={expanded}
-                  ></ResourceItem>
+                  {item?.resource && (
+                    <ResourceItem
+                      resource={item.resource}
+                      productName={productName}
+                      expanded={expanded}
+                    ></ResourceItem>
+                  )}
                 </td>
               </tr>
             ))}

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, Depends, HTTPException, status
+from fastapi import FastAPI, File, UploadFile, Depends, HTTPException, status,Form
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Header
@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from passlib.context import CryptContext
 from jose import jwt, JWTError
 import datetime
+from typing import Annotated
 import random
 from database import SessionLocal, engine, Base, User
 from azure_ops import AzureOps
@@ -397,3 +398,67 @@ def product_image(request_data: ProductImgDataRequest, authorization: str = Head
         base64_str = base64.b64encode(product_image_bytes).decode("utf-8")
     return {"image_data": base64_str}
 
+@app.post("/upload_image/")
+async def uploadImage(product_name: Annotated[str, Form()],file: UploadFile = File(...), authorization: str = Header(...)):
+    try:
+        payload = authorised(authorization)
+        print("upload image called...",payload)
+        print(product_name, file)
+        # Check if it's an image
+        if file.content_type not in ("image/jpeg","image/png"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Only jpg and png files are accepted."
+            )    
+        userData = payload.get("sub")
+        tokenData=json.loads(userData)
+        imageData=await file.read()
+        
+        blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0]["rg-name"])
+        if len(blob_storage) == 0:
+            return
+        
+        azureOps.blobOps.setBlobServiceClient(storage_name=blob_storage[0]["name"])
+        container_name=f"prd-{product_name}"
+        azureOps.blobOps.setContainerClient(container_name=container_name)
+        
+        img_url = f"images/{file.filename}"
+        print(img_url)
+        res = azureOps.blobOps.createOrUpdateBlob(img_url,imageData)
+        return res
+        
+    except Exception as e:
+        print(e)
+        return False
+
+
+
+
+
+@app.post("/remove_resource/")
+def remove_resource(request_data: ProductResourceRequest, authorization: str = Header(...)):
+    try:
+        payload = authorised(authorization)
+        userData = payload.get("sub")
+        tokenData=json.loads(userData)
+        
+        blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0]["rg-name"])
+        if len(blob_storage) == 0:
+            return
+        
+        azureOps.blobOps.setBlobServiceClient(storage_name=blob_storage[0]["name"])
+        container_name=f"prd-{request_data.product_name}"
+        azureOps.blobOps.setContainerClient(container_name=container_name)
+        folder_prefix=""
+        if(request_data.type=="image"):
+            folder_prefix="images"
+        
+        resp=azureOps.blobOps.deleteBlob(f"{folder_prefix}/{request_data.file_name}")
+        print(resp)
+        return True
+
+
+
+    except Exception as e:
+        print(e)
+        return False

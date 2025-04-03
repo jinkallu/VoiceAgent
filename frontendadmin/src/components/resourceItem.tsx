@@ -30,7 +30,7 @@ function ResourceItem({ resource, productName, expanded }: props) {
     if (expanded) getResource(token, productName, resource);
   }, [resource, productName, token, expanded]);
 
-  return imageLoading ? (
+  return imageLoading && imageURL ? (
     <LoadingSpinner></LoadingSpinner>
   ) : (
     <img
