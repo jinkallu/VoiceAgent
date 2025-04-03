@@ -233,7 +233,7 @@ class AzureOps:
         stt_app_url = None
         env_vars = []
         command = ["build/bin/whisper-server", "--host", "0.0.0.0", "-lpt", "-0.5"]
-        stt_app = azure_ops.containerAppManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, stt_app_name, location, identity_name, os.getenv("PERMANENT_ACR_NAME"), os.getenv("PERMANENT_STT_IMG_NAME"),  os.getenv("PERMANENT_STT_IMG_TAG"), [], 8080, False, command)
+        stt_app = self.containerAppManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, stt_app_name, location, identity_name, os.getenv("PERMANENT_ACR_NAME"), os.getenv("PERMANENT_STT_IMG_NAME"),  os.getenv("PERMANENT_STT_IMG_TAG"), [], 8080, False, command)
         if stt_app is None:
                 # TODO: Manage container app creation error
                 pass
@@ -246,7 +246,7 @@ class AzureOps:
         tts_app = None
         tts_app_url = None
         env_vars = []
-        tts_app = azure_ops.containerAppManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, tts_app_name, location, identity_name, os.getenv("PERMANENT_ACR_NAME"), os.getenv("PERMANENT_TTS_IMG_NAME"),  os.getenv("PERMANENT_TTS_IMG_TAG"), [], 80, False)
+        tts_app = self.containerAppManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, tts_app_name, location, identity_name, os.getenv("PERMANENT_ACR_NAME"), os.getenv("PERMANENT_TTS_IMG_NAME"),  os.getenv("PERMANENT_TTS_IMG_TAG"), [], 80, False)
         if tts_app is None:
                 # TODO: Manage container app creation error
                 pass
