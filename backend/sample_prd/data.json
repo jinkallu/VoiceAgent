@@ -1,38 +1,35 @@
-{
-    "product": "AI Assistant",
-    "troubleshooting": [
-        {
-            "problem": " How to connect the earth ground wire to the ActiPower 4.0 PDU..",
-            "steps": [
-                {
-                    "step": "Ensure the PDU is completely powered off and unplugged.",
-                    "resource": {
-                        "type": "image",
-                        "fileName": "image_page_50_0.jpeg"
-                    }
-                },
-                {
-                    "step": "Locate the earth ground wire connection point on the PDU.",
-                    "resource": {
-                        "type": "image",
-                        "fileName": "image_page_50_0.jpeg"
-                    }
-                },
-                {
-                    "step": "Attach the earth ground wire securely to the designated connection point.",
-                    "resource": {
-                        "type": "image",
-                        "fileName": "image_page_50_0.jpeg"
-                    }
-                },
-                {
-                    "step": "Verify the connection is tight and reliable before powering on the PDU.",
-                    "resource": {
-                        "type": "image",
-                        "fileName": "image_page_50_0.jpeg"
-                    }
+[
+    {
+        "problem": " How to connect the earth ground wire to the ActiPower 4.0 PDU..",
+        "steps": [
+            {
+                "step": "Ensure the PDU is completely powered off and unplugged.",
+                "resource": {
+                    "type": "image",
+                    "fileName": "image_page_50_0.jpeg"
                 }
-            ]
-        }
-    ]
-}
+            },
+            {
+                "step": "Locate the earth ground wire connection point on the PDU.",
+                "resource": {
+                    "type": "image",
+                    "fileName": "image_page_50_0.jpeg"
+                }
+            },
+            {
+                "step": "Attach the earth ground wire securely to the designated connection point.",
+                "resource": {
+                    "type": "image",
+                    "fileName": "image_page_50_0.jpeg"
+                }
+            },
+            {
+                "step": "Verify the connection is tight and reliable before powering on the PDU.",
+                "resource": {
+                    "type": "image",
+                    "fileName": "image_page_50_0.jpeg"
+                }
+            }
+        ]
+    }
+]

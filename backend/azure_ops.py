@@ -233,7 +233,7 @@ class AzureOps:
         stt_app_url = None
         env_vars = []
         command = ["build/bin/whisper-server", "--host", "0.0.0.0", "-lpt", "-0.5"]
-        stt_app = azure_ops.containerAppManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, stt_app_name, location, identity_name, os.getenv("PERMANENT_ACR_NAME"), "stt", "main", [], 8080, False, command)
+        stt_app = azure_ops.containerAppManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, stt_app_name, location, identity_name, os.getenv("PERMANENT_ACR_NAME"), os.getenv("PERMANENT_STT_IMG_NAME"),  os.getenv("PERMANENT_STT_IMG_TAG"), [], 8080, False, command)
         if stt_app is None:
                 # TODO: Manage container app creation error
                 pass
@@ -246,7 +246,7 @@ class AzureOps:
         tts_app = None
         tts_app_url = None
         env_vars = []
-        tts_app = azure_ops.containerAppManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, tts_app_name, location, identity_name, os.getenv("PERMANENT_ACR_NAME"), "tts", "main", [], 80, False)
+        tts_app = azure_ops.containerAppManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, tts_app_name, location, identity_name, os.getenv("PERMANENT_ACR_NAME"), os.getenv("PERMANENT_TTS_IMG_NAME"),  os.getenv("PERMANENT_TTS_IMG_TAG"), [], 80, False)
         if tts_app is None:
                 # TODO: Manage container app creation error
                 pass
@@ -269,16 +269,20 @@ class AzureOps:
         else:
             env_vars = [
                             {
-                                "name": "AZURE_OPENAI_ENDPOINT",
-                                "value": os.getenv("AZURE_OPENAI_ENDPOINT")
+                                "name": "OPENAI_4O_MINI_ENDPOINT", 
+                                "value": os.getenv("OPENAI_4O_MINI_ENDPOINT")
                             },
                             {
-                                "name": "AZURE_OPENAI_REALTIME_DEPLOYMENT",
-                                "value": os.getenv("AZURE_OPENAI_REALTIME_DEPLOYMENT")
+                                "name": "OPENAI_4O_MINI_KEY", 
+                                "value": os.getenv("OPENAI_4O_MINI_KEY")
                             },
                             {
-                                "name": "AZURE_OPENAI_REALTIME_VOICE_CHOICE",
-                                "value": os.getenv("AZURE_OPENAI_REALTIME_VOICE_CHOICE")
+                                "name": "OPENAI_4O_ENDPOINT", 
+                                "value": os.getenv("OPENAI_4O_ENDPOINT")
+                            },
+                            {
+                                "name": "OPENAI_4O_KEY", 
+                                "value": os.getenv("OPENAI_4O_KEY")
                             },
                             {
                                 "name": "AZURE_CLIENT_ID", 
@@ -379,9 +383,9 @@ def test_create_container_env(azure_ops):
 
 if __name__ == "__main__":
     azure_ops = AzureOps()
-    #azure_ops.provision_resources("myassistant28", "test1")
-    command = ["build/bin/whisper-server", "--host", "0.0.0.0", "-lpt", "-0.5"]
-    app = azure_ops.containerAppManagement.createContainerApp("c5ad8acd-d3b5-4357-beae-caeff17c2d82", "myassistant27", "myassistant27-env", "myassistant27-stt", "east us 2", "myassistant27-identity", os.getenv("PERMANENT_ACR_NAME"), "stt", "main", [], 8080, False, command)
+    azure_ops.provision_resources("myassistant30", "test1")
+    # command = ["build/bin/whisper-server", "--host", "0.0.0.0", "-lpt", "-0.5"]
+    # app = azure_ops.containerAppManagement.createContainerApp("c5ad8acd-d3b5-4357-beae-caeff17c2d82", "myassistant27", "myassistant27-env", "myassistant27-stt", "east us 2", "myassistant27-identity", os.getenv("PERMANENT_ACR_NAME"), "stt", "main", [], 8080, False, command)
 
     #print(azure_ops.containerAppManagement.createContainerApp("c5ad8acd-d3b5-4357-beae-caeff17c2d82", "myassistant17", "myassistant17-env", "testapp1", "east us 2").identity.principal_id)
     # azure_ops.authManagement.authAccessToStorage("f24636bc-e888-4ddc-b222-ba55e8083b73", "myassistant14", "myassistant14d8ccj")
