@@ -2,17 +2,25 @@ import { useEffect, useState } from "react";
 import { IStep, ITSList } from "../interfaces/generic";
 import Button from "./UI/button/Button";
 import { Icon } from "@iconify/react";
+import ResourceItem from "./resourceItem";
+import { removeResource, uploadImage } from "../services/apiService";
+import { useAdminStore } from "../store/zustand/store";
+import Modal from "./UI/modal/Modal";
+import ImageHandler from "./imageHandler";
 interface props {
   addTSStep: (val: ITSList) => void;
   setNewProblem: (val: boolean) => void;
   data?: ITSList | null;
+  productName: string | "";
 }
 
-function NewProblem({ addTSStep, setNewProblem, data }: props) {
+function NewProblem({ productName, addTSStep, setNewProblem, data }: props) {
   const [tsStep, setTSStep] = useState<ITSList>();
   // const [steps, setSteps] = useState<IStep[]>([]);
+  const [isAddImageOpen, setIsAddImageOpen] = useState<boolean>(false);
   const [problem, setProblem] = useState("");
   const [step, setStep] = useState<string>("");
+  const token = useAdminStore((state) => state.token);
   const addProblem = (problem: string) => {
     setTSStep((prev) => {
       return { problem, steps: prev?.steps || [] };
@@ -46,6 +54,61 @@ function NewProblem({ addTSStep, setNewProblem, data }: props) {
       return newTSStep;
     });
     setStep("");
+  };
+  const uploadSelectedImage = async (
+    formData: FormData,
+    fileName: string,
+    step: string
+  ) => {
+    formData.append("product_name", productName);
+    const res = await uploadImage(token, formData);
+    if (res === true) {
+      const newTSList = { ...tsStep };
+      const newSteps = newTSList?.steps?.map((item) => {
+        if (item.step === step) {
+          return { ...item, resource: { type: "image", fileName: fileName } };
+        }
+
+        return item;
+      });
+      console.log(newSteps);
+
+      if (tsStep?.problem) {
+        const newTSStep = { ...tsStep, steps: newSteps || [] };
+        setTSStep(newTSStep);
+
+        addTSStep(newTSStep);
+      }
+
+      console.log(res);
+    }
+    setIsAddImageOpen(false);
+  };
+  const removeResourceFromStep = async (
+    token: string,
+    problem: string,
+    step: string,
+    productName: string,
+    resource: any
+  ) => {
+    const newTSList = { ...tsStep };
+    const newSteps = newTSList?.steps?.map((item) => {
+      if (item.step === step) {
+        return { ...item, resource: null };
+      }
+
+      return item;
+    });
+    console.log(newSteps);
+
+    if (tsStep?.problem) {
+      const newTSStep = { ...tsStep, steps: newSteps || [] };
+      setTSStep(newTSStep);
+
+      addTSStep(newTSStep);
+    }
+
+    // removeResource(token, productName, resource);
   };
   useEffect(() => {
     if (data) setTSStep(data);
@@ -84,27 +147,29 @@ function NewProblem({ addTSStep, setNewProblem, data }: props) {
         ></textarea>
         <Button onClick={() => addProblem(problem)}>Add Problem</Button>
       </div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <textarea
+      {tsStep?.problem && (
+        <div
           style={{
-            minWidth: "500px",
-            maxWidth: "100%",
-            minHeight: "50px",
-            height: "100%",
-            width: "100%",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
-          placeholder="Add step"
-          value={step}
-          onChange={(e) => setStep(e.target.value)}
-        ></textarea>
-        <Button onClick={() => addProblemStep(step)}>Add step</Button>
-      </div>
+        >
+          <textarea
+            style={{
+              minWidth: "500px",
+              maxWidth: "100%",
+              minHeight: "50px",
+              height: "100%",
+              width: "100%",
+            }}
+            placeholder="Add step"
+            value={step}
+            onChange={(e) => setStep(e.target.value)}
+          ></textarea>
+          <Button onClick={() => addProblemStep(step)}>Add step</Button>
+        </div>
+      )}
 
       {tsStep?.problem && (
         <div
@@ -113,6 +178,8 @@ function NewProblem({ addTSStep, setNewProblem, data }: props) {
             flexDirection: "column",
             marginTop: "10px",
             marginBottom: "10px",
+            height: "50vh",
+            overflowY: "auto",
           }}
         >
           <h3>Problem - {tsStep.problem}</h3>
@@ -121,24 +188,69 @@ function NewProblem({ addTSStep, setNewProblem, data }: props) {
             <div
               style={{
                 display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
+                flexDirection: "column",
+
                 boxShadow: "2px 2px lightblue",
-                padding: "5px",
               }}
               key={step.step}
             >
               <div
-                style={{ display: "flex", alignItems: "center", gap: "5px" }}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "5px",
+                }}
               >
-                <h5>{index + 1}.</h5>
-                <h5>{step.step}</h5>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
+                >
+                  <h5>{index + 1}.</h5>
+                  <h5>{step.step}</h5>
+                </div>
+                <ResourceItem
+                  productName={productName}
+                  resource={step.resource}
+                  expanded={true}
+                ></ResourceItem>
               </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "end",
+                  alignItems: "center",
+                  gap: "10px",
+                  paddingBottom: "5px",
+                }}
+              >
+                <Button
+                  outline
+                  onClick={() =>
+                    removeResourceFromStep(
+                      token,
+                      tsStep.problem,
+                      step.step,
+                      productName,
+                      step.resource
+                    )
+                  }
+                >
+                  Remove Image
+                </Button>
+                <Button outline onClick={() => setIsAddImageOpen(true)}>
+                  Change/Add Image
+                </Button>
 
-              <Icon
-                onClick={() => removeStep(step.step)}
-                icon="material-symbols-light:delete-outline"
-              ></Icon>
+                <Button outline onClick={() => removeStep(step.step)}>
+                  Remove Step
+                </Button>
+              </div>
+              {isAddImageOpen && (
+                <ImageHandler
+                  step={step.step}
+                  uploadSelectedImage={uploadSelectedImage}
+                ></ImageHandler>
+              )}
             </div>
           ))}
         </div>

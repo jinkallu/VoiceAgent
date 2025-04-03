@@ -1,5 +1,5 @@
 from azure.storage.blob import BlobServiceClient
-from azure.identity import AzureDeveloperCliCredential, DefaultAzureCredential
+from azure.identity import ManagedIdentityCredential, DefaultAzureCredential
 from azure.core.exceptions import ResourceExistsError, AzureError
 import os
 import json
@@ -16,12 +16,13 @@ class BlobOps:
 
         
 
-    def setBlobServiceClient(self, storage_name):
-        default_credential = DefaultAzureCredential()
+    def setBlobServiceClient(self, storage_name, credential=None):
+        if not credential:
+            credential = DefaultAzureCredential()
         connection_url = f"https://{storage_name}.blob.core.windows.net"
 
         # Create the BlobServiceClient object
-        self.blob_service_client = BlobServiceClient(connection_url, credential=default_credential)
+        self.blob_service_client = BlobServiceClient(connection_url, credential=credential)
 
     def getContainersList(self):
         containers=self.blob_service_client.list_containers()
@@ -75,6 +76,19 @@ class BlobOps:
         try:
             # Upload the JSON string
             blob_client.upload_blob(blob_bytes, overwrite=True)
+            return True
+        except AzureError as e:
+            print(f"❌ Azure error occurred: {e}")
+
+        except Exception as e:
+            print(f"❌ Unexpected error: {e}")
+
+    
+    def deleteBlob(self, blob_name):
+        try:
+            blob_client = self.container_client.get_blob_client(blob_name)
+            blob_client.delete_blob()
+            # Upload the JSON string
             return True
         except AzureError as e:
             print(f"❌ Azure error occurred: {e}")

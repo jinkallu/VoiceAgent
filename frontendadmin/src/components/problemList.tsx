@@ -21,6 +21,7 @@ function ProblemList({
       style={{
         display: "flex",
         flexDirection: "column",
+        width: "100%",
       }}
     >
       {problemList?.map((tsStep: ITSList) => (
@@ -30,7 +31,7 @@ function ProblemList({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-
+            width: "100%",
             boxShadow: "2px 2px gray",
             borderLeft: "2px solid lightblue",
           }}

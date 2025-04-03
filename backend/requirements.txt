@@ -20,3 +20,4 @@ azure-mgmt-containerregistry
 azure-mgmt-msi
 azure-mgmt-cognitiveservices
 azure.mgmt.authorization
+azure.mgmt.containerinstance
