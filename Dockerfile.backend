@@ -1,0 +1,22 @@
+# Stage 1: Build the backend
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Install dependencies
+COPY backend/requirements.txt .
+RUN pip install -r requirements.txt
+
+# Copy backend code
+COPY backend/ /app
+
+# Install Gunicorn to serve the app
+RUN pip install gunicorn
+
+# Expose the backend port (8000)
+EXPOSE 8000
+
+WORKDIR /app/backend
+
+# Run Gunicorn with FastAPI
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

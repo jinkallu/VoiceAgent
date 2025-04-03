@@ -18,6 +18,16 @@ import json
 from PIL import Image
 import io
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Define allowed origins
+origins = [
+    os.environ.get("ALLOWED_CLOUD_ORIGIN"),  # Your frontend URL
+    os.environ.get("ALLOWED_LOCAL_ORIGIN"),  # Allow local development (optional)
+]
 
 azureOps = AzureOps()
 processPDF = ProcessPDF()
@@ -35,7 +45,7 @@ app = FastAPI()
 # Enable CORS (React Frontend)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Allow frontend
+    allow_origins=origins,  # Allow frontend
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -104,7 +114,7 @@ def getUserData():
     except Exception as e:
         print("error in accessing userdata", e)
 
-@app.post("/register/")
+@app.post("/api/register/")
 def register(user_data: UserRegister):
     # Log the received data
     print(f"*Received user data: {user_data}")
@@ -136,7 +146,7 @@ def register(user_data: UserRegister):
     return {"message": "User registered successfully"}
 
 
-@app.post("/login/")
+@app.post("/api/login/")
 def login(user_data: UserLogin,):
     print('login called',user_data)
     # user = db.query(User).filter(User.username == user_data.username).first()
@@ -155,7 +165,7 @@ def login(user_data: UserLogin,):
         print(e)
         return None  
 
-@app.get("/loadresourcegroups/")
+@app.get("/api/loadresourcegroups/")
 def loadResourceGroups(authorization: str = Header(...)):
     payload = authorised(authorization)
     username = payload.get("sub")
@@ -194,7 +204,7 @@ def authorised(authorization):
         else:
             raise HTTPException(status_code=401, detail="Invalid token")
     
-@app.post("/createresourcegroup/")
+@app.post("/api/createresourcegroup/")
 def createresourcegroup( res: Assistant, authorization: str = Header(...)):
     payload = authorised(authorization)
     userData = payload.get("sub")
@@ -205,7 +215,7 @@ def createresourcegroup( res: Assistant, authorization: str = Header(...)):
     azureOps.provision_resources(res_name, username)
 
 
-@app.get("/products/")
+@app.get("/api/products/")
 def products( authorization: str = Header(...)):
     payload = authorised(authorization)
     userData = payload.get("sub")
@@ -237,7 +247,7 @@ def products( authorization: str = Header(...)):
 
     return {"products": prdContainers}
 
-@app.post("/product_data/")
+@app.post("/api/product_data/")
 def product_data(request_data: ProductDataRequest, authorization: str = Header(...)):
     try:
         payload = authorised(authorization)
@@ -262,7 +272,7 @@ def product_data(request_data: ProductDataRequest, authorization: str = Header(.
         print(e)
         return {"product_data": [],"status":400}
     
-@app.post("/product_resource/")
+@app.post("/api/product_resource/")
 def product_data(request_data: ProductResourceRequest, authorization: str = Header(...)):
     try:
         payload = authorised(authorization)
@@ -300,7 +310,7 @@ def product_data(request_data: ProductResourceRequest, authorization: str = Head
         return {"product_resource": None,"status":400}
 
 
-@app.post("/upload_productdata/")
+@app.post("/api/upload_productdata/")
 async def uploadProductdata(request_data:ProductData, authorization: str = Header(...)):
     try:
         payload = authorised(authorization)
@@ -326,7 +336,7 @@ async def uploadProductdata(request_data:ProductData, authorization: str = Heade
         return 
 
 
-@app.post("/add_product/")
+@app.post("/api/add_product/")
 async def uploadProductdata(request_data:ProductName, authorization: str = Header(...)):
     try:
         payload = authorised(authorization)
@@ -350,7 +360,7 @@ async def uploadProductdata(request_data:ProductName, authorization: str = Heade
         
 
 
-@app.post("/upload_pdf/")
+@app.post("/api/upload_pdf/")
 async def uploadPdf(file: UploadFile = File(...), authorization: str = Header(...)):
     try:
         payload = authorised(authorization)
@@ -383,7 +393,7 @@ async def uploadPdf(file: UploadFile = File(...), authorization: str = Header(..
 
     # print(f"Received file: {file.filename}")
 
-@app.post("/product_image/")
+@app.post("/api/product_image/")
 def product_image(request_data: ProductImgDataRequest, authorization: str = Header(...)):
     payload = authorised(authorization)
     azureOps.blobOps.setBlobServiceClient("tralpinestorage1")
@@ -398,7 +408,7 @@ def product_image(request_data: ProductImgDataRequest, authorization: str = Head
         base64_str = base64.b64encode(product_image_bytes).decode("utf-8")
     return {"image_data": base64_str}
 
-@app.post("/upload_image/")
+@app.post("/api/upload_image/")
 async def uploadImage(product_name: Annotated[str, Form()],file: UploadFile = File(...), authorization: str = Header(...)):
     try:
         payload = authorised(authorization)
@@ -435,7 +445,7 @@ async def uploadImage(product_name: Annotated[str, Form()],file: UploadFile = Fi
 
 
 
-@app.post("/remove_resource/")
+@app.post("/api/remove_resource/")
 def remove_resource(request_data: ProductResourceRequest, authorization: str = Header(...)):
     try:
         payload = authorised(authorization)
