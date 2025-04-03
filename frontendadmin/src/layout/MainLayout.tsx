@@ -21,27 +21,10 @@ function MainLayout() {
   }, []);
 
   useEffect(() => {
-    console.log("useeffect called", token);
     if (!token) {
       navigate("/login");
-      console.log("navigating");
     }
   }, [token]);
-
-  // async function loadResourceGroups(token: string) {
-  //   const rgs = await getResouceGroupFromUsername(token);
-  //   if (rgs?.status === 200) {
-  //     setResourceGroups(rgs?.rgs);
-  //   } else if (rgs?.status === 401) {
-  //     setToken(null);
-  //     navigate("/login");
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   if (token) loadResourceGroups(token);
-  //   else navigate("/login");
-  // }, [token]);
 
   return (
     <div className={classes.container}>

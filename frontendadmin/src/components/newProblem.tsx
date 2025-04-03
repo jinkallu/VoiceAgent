@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { IStep, ITSList } from "../interfaces/generic";
+import { IImage, IStep, ITSList } from "../interfaces/generic";
 import Button from "./UI/button/Button";
 import { Icon } from "@iconify/react";
 import ResourceItem from "./resourceItem";
@@ -7,17 +7,25 @@ import { removeResource, uploadImage } from "../services/apiService";
 import { useAdminStore } from "../store/zustand/store";
 import Modal from "./UI/modal/Modal";
 import ImageHandler from "./imageHandler";
+import LoadingSpinner from "./UI/loadingSpinner/LoadingSpinner";
 interface props {
   addTSStep: (val: ITSList) => void;
   setNewProblem: (val: boolean) => void;
   data?: ITSList | null;
   productName: string | "";
+  isLoading: boolean;
 }
 
-function NewProblem({ productName, addTSStep, setNewProblem, data }: props) {
+function NewProblem({
+  productName,
+  addTSStep,
+  setNewProblem,
+  data,
+  isLoading,
+}: props) {
   const [tsStep, setTSStep] = useState<ITSList>();
-  // const [steps, setSteps] = useState<IStep[]>([]);
-  const [isAddImageOpen, setIsAddImageOpen] = useState<boolean>(false);
+  const [imagesToUpload, setImagesToUpload] = useState<IImage[]>([]);
+  const [stepSelected, setStepSelected] = useState<string>("");
   const [problem, setProblem] = useState("");
   const [step, setStep] = useState<string>("");
   const token = useAdminStore((state) => state.token);
@@ -27,8 +35,41 @@ function NewProblem({ productName, addTSStep, setNewProblem, data }: props) {
     });
   };
 
-  const saveTSStep = (tsStep: ITSList | null) => {
+  const addImageToUpload = (img: IImage) => {
+    const imgData = [...imagesToUpload];
+    const index = imgData?.findIndex((item) => item.step === img.step);
+    if (index !== -1) {
+      imgData[index] = img;
+    } else {
+      imgData.push(img);
+    }
+
+    const newTSList = { ...tsStep };
+    const newSteps = newTSList?.steps?.map((item) => {
+      if (item.step === img.step) {
+        return { ...item, resource: { type: "image", fileName: img.fileName } };
+      }
+
+      return item;
+    });
+
+    if (tsStep?.problem) {
+      const newTSStep = { ...tsStep, steps: newSteps || [] };
+      setTSStep(newTSStep);
+      setImagesToUpload(imgData);
+    }
+  };
+
+  const saveTSStep = async (tsStep: ITSList | null) => {
     if (tsStep) {
+      if (imagesToUpload) {
+        const responses = await Promise.all(
+          imagesToUpload?.map(async (image) => {
+            return uploadSelectedImage(image.val);
+          })
+        );
+      }
+      // todo- add an error message for image upload failures.
       addTSStep(tsStep);
       setNewProblem(false);
     }
@@ -55,42 +96,13 @@ function NewProblem({ productName, addTSStep, setNewProblem, data }: props) {
     });
     setStep("");
   };
-  const uploadSelectedImage = async (
-    formData: FormData,
-    fileName: string,
-    step: string
-  ) => {
+  const uploadSelectedImage = async (formData: FormData) => {
     formData.append("product_name", productName);
     const res = await uploadImage(token, formData);
-    if (res === true) {
-      const newTSList = { ...tsStep };
-      const newSteps = newTSList?.steps?.map((item) => {
-        if (item.step === step) {
-          return { ...item, resource: { type: "image", fileName: fileName } };
-        }
-
-        return item;
-      });
-      console.log(newSteps);
-
-      if (tsStep?.problem) {
-        const newTSStep = { ...tsStep, steps: newSteps || [] };
-        setTSStep(newTSStep);
-
-        addTSStep(newTSStep);
-      }
-
-      console.log(res);
-    }
-    setIsAddImageOpen(false);
+    return res;
   };
-  const removeResourceFromStep = async (
-    token: string,
-    problem: string,
-    step: string,
-    productName: string,
-    resource: any
-  ) => {
+
+  const removeResourceFromStep = async (step: string) => {
     const newTSList = { ...tsStep };
     const newSteps = newTSList?.steps?.map((item) => {
       if (item.step === step) {
@@ -99,17 +111,13 @@ function NewProblem({ productName, addTSStep, setNewProblem, data }: props) {
 
       return item;
     });
-    console.log(newSteps);
 
     if (tsStep?.problem) {
       const newTSStep = { ...tsStep, steps: newSteps || [] };
       setTSStep(newTSStep);
-
-      addTSStep(newTSStep);
     }
-
-    // removeResource(token, productName, resource);
   };
+
   useEffect(() => {
     if (data) setTSStep(data);
   }, [data]);
@@ -225,19 +233,11 @@ function NewProblem({ productName, addTSStep, setNewProblem, data }: props) {
               >
                 <Button
                   outline
-                  onClick={() =>
-                    removeResourceFromStep(
-                      token,
-                      tsStep.problem,
-                      step.step,
-                      productName,
-                      step.resource
-                    )
-                  }
+                  onClick={() => removeResourceFromStep(step.step)}
                 >
                   Remove Image
                 </Button>
-                <Button outline onClick={() => setIsAddImageOpen(true)}>
+                <Button outline onClick={() => setStepSelected(step.step)}>
                   Change/Add Image
                 </Button>
 
@@ -245,10 +245,10 @@ function NewProblem({ productName, addTSStep, setNewProblem, data }: props) {
                   Remove Step
                 </Button>
               </div>
-              {isAddImageOpen && (
+              {stepSelected === step.step && (
                 <ImageHandler
                   step={step.step}
-                  uploadSelectedImage={uploadSelectedImage}
+                  addImageToUpload={addImageToUpload}
                 ></ImageHandler>
               )}
             </div>
@@ -272,6 +272,7 @@ function NewProblem({ productName, addTSStep, setNewProblem, data }: props) {
             Save
           </Button>
         )}
+        {isLoading && <LoadingSpinner></LoadingSpinner>}
       </div>
     </div>
   );

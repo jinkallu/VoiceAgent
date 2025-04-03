@@ -3,12 +3,13 @@ import Button from "./UI/button/Button";
 import { uploadPDF } from "../services/apiService";
 import { useAdminStore } from "../store/zustand/store";
 import LoadingSpinner from "./UI/loadingSpinner/LoadingSpinner";
+import { IImage } from "../interfaces/generic";
 interface props {
-  uploadSelectedImage: (val: FormData, fileName: string, step: string) => void;
+  addImageToUpload: (val: IImage) => void;
   step: string;
 }
 
-function ImageHandler({ uploadSelectedImage, step }: props) {
+function ImageHandler({ addImageToUpload, step }: props) {
   const [selectedFile, setSelectedFile] = useState<File | null>();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -32,7 +33,11 @@ function ImageHandler({ uploadSelectedImage, step }: props) {
       formData.append("fileb", selectedFile);
       console.log(selectedFile);
       setIsLoading(true);
-      const res = await uploadSelectedImage(formData, selectedFile.name, step);
+      const res = await addImageToUpload({
+        val: formData,
+        fileName: selectedFile.name,
+        step,
+      });
       setSelectedFile(null);
       setIsLoading(false);
 
@@ -55,12 +60,12 @@ function ImageHandler({ uploadSelectedImage, step }: props) {
         onChange={onFileChange}
         accept="image/png, image/jpeg"
       ></input>
-      <Button onClick={onFileUpload}>Upload</Button>
+      <Button onClick={onFileUpload}>Add Image</Button>
       <div style={{ display: "flex", alignItems: "center" }}>
         {isLoading && <LoadingSpinner></LoadingSpinner>}
 
         {isLoading && (
-          <h4>Please wait .. Proessing can take a couple of minutes..!</h4>
+          <h4>Please wait .. Processing can take a couple of minutes..!</h4>
         )}
       </div>
     </div>

@@ -31,10 +31,7 @@ function ProductEdit() {
   const [uploadEnabled, setUploadEnabled] = useState<boolean>(false);
   const [pdfProblems, setPdfProblems] = useState<ITSList[] | []>([]);
   const [isAppendMode, setIsAppendMode] = useState<boolean>(true);
-
-  useEffect(() => {
-    console.log(pdfProblems);
-  }, [pdfProblems]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // const { data, error, status } = useFetch<IProductsTable>(
   //   `${url}/${productId}.json`
@@ -78,6 +75,7 @@ function ProductEdit() {
     loadDataFromProductName(token, productName || "");
   };
   const addTSStep = (tsStep: ITSList) => {
+    setIsLoading(true);
     const newData: ITSList[] = [...productData];
     if (selectedProblem) {
       const index = newData?.findIndex(
@@ -89,6 +87,7 @@ function ProductEdit() {
     }
     uploadToAzure(newData);
     setProductData(newData);
+    setIsLoading(false);
   };
 
   const openEditProblem = (data: ITSList) => {
@@ -125,6 +124,7 @@ function ProductEdit() {
           }}
         >
           <NewProblem
+            isLoading={isLoading}
             productName={productName}
             data={selectedProblem}
             addTSStep={addTSStep}
@@ -152,11 +152,11 @@ function ProductEdit() {
           </div>
         )}
 
-        {editable && (
+        {/* {editable && (
           <Button outline onClick={() => uploadToAzure(productData)}>
             Save Changes
           </Button>
-        )}
+        )} */}
 
         <Button onClick={() => setEditable((prev) => !prev)}>
           {`${editable ? "Cancel Edit" : "Edit"}`}

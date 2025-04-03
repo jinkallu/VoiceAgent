@@ -47,16 +47,9 @@ function Sidebar() {
 
     if (data?.status === 200) {
       setProducts(data?.products || []);
-      console.log("products set", data);
     }
     setLoadingProducts(false);
   }
-
-  // useEffect(() => {
-  //   if (token) {
-  //     getProducts(token);
-  //   }
-  // }, [token]);
 
   useEffect(() => {
     const curPath = window.location.pathname.split("/")[1];

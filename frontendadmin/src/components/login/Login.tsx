@@ -37,11 +37,10 @@ function LoginBox() {
     );
 
     if (data?.access_token) {
-      console.log(data);
       setToken(data.access_token);
       setResourceGroup(data?.resourceGroups || []);
       localStorage.setItem("token", data.access_token);
-      setUserName(userNameRef.current.value);
+      setUserName(userNameRef?.current?.value);
       loginCtx.toggleLogin();
       navigate("/");
     } else {

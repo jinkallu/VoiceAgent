@@ -44,12 +44,16 @@ function ProblemList({
           <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
             {editable && (
               <Icon
+                width={32}
+                height={32}
                 onClick={() => deleteProblem(tsStep.problem)}
                 icon="material-symbols:delete-outline"
               ></Icon>
             )}
             {editable && (
               <Icon
+                width={32}
+                height={32}
                 onClick={() => openEditProblem(tsStep)}
                 icon="mingcute:edit-line"
               ></Icon>

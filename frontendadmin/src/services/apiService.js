@@ -1,5 +1,6 @@
 const authenticate = async (username, password) => {
   try {
+    console.log("login started");
     const response = await fetch("http://127.0.0.1:8000/login/", {
       method: "POST",
       body: JSON.stringify({ username, password }),
@@ -9,6 +10,7 @@ const authenticate = async (username, password) => {
     });
 
     const data = await response.json();
+    console.log(data);
     return data;
   } catch (e) {
     console.log(e);
