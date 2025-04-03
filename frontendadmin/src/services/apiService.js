@@ -1,3 +1,21 @@
+const authenticate = async (username, password) => {
+  try {
+    const response = await fetch("http://127.0.0.1:8000/login/", {
+      method: "POST",
+      body: JSON.stringify({ username, password }),
+      headers: {
+        "Content-Type": "application/json", // <-- Add this!
+      },
+    });
+
+    const data = await response.json();
+    return data;
+  } catch (e) {
+    console.log(e);
+    return;
+  }
+};
+
 const getResourceGroups = async (token) => {
   try {
     const response = await fetch("http://127.0.0.1:8000/resourcegroups/", {
@@ -255,4 +273,5 @@ export {
   uploadPDF,
   removeResource,
   uploadImage,
+  authenticate,
 };

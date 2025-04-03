@@ -23,6 +23,7 @@ function ProductEdit() {
   const token = useAdminStore((state) => state.token);
   const location = useLocation();
   const [productData, setProductData] = useState<ITSList[] | []>([]);
+  const [loadingProductData, setLoadingProductData] = useState<boolean>(false);
   const [productName, sestProductName] = useState<string>("");
   const [editable, setEditable] = useState<boolean>(false);
   const [newProblem, setNewProblem] = useState<boolean>(false);
@@ -52,10 +53,12 @@ function ProductEdit() {
   // }
 
   async function loadDataFromProductName(token: string, product_name: string) {
+    setLoadingProductData(true);
     const data = await getDataFromProductName(token, product_name);
     if (data?.status === 200) {
       setProductData(data?.productData || []);
     }
+    setLoadingProductData(false);
   }
 
   const deleteProblem = async (problem: string) => {
@@ -107,6 +110,7 @@ function ProductEdit() {
           display: "flex",
           justifyContent: "space-around",
           alignItems: "center",
+          width: "100%",
         }}
       >
         <h2 className="title">{`${
@@ -115,7 +119,7 @@ function ProductEdit() {
       </div>
       {newProblem && (
         <Modal
-          title={`New Problem- ${productName}`}
+          title={productName}
           onConfirm={() => {
             setNewProblem((prev) => !prev);
           }}
@@ -176,6 +180,7 @@ function ProductEdit() {
           ></PDFHandler>
         </Modal>
       )}
+      {loadingProductData && <LoadingSpinner></LoadingSpinner>}
       {productData.length > 0 && productName && (
         <ProblemList
           editable={editable}

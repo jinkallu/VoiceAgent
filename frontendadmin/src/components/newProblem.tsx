@@ -147,27 +147,29 @@ function NewProblem({ productName, addTSStep, setNewProblem, data }: props) {
         ></textarea>
         <Button onClick={() => addProblem(problem)}>Add Problem</Button>
       </div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <textarea
+      {tsStep?.problem && (
+        <div
           style={{
-            minWidth: "500px",
-            maxWidth: "100%",
-            minHeight: "50px",
-            height: "100%",
-            width: "100%",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
-          placeholder="Add step"
-          value={step}
-          onChange={(e) => setStep(e.target.value)}
-        ></textarea>
-        <Button onClick={() => addProblemStep(step)}>Add step</Button>
-      </div>
+        >
+          <textarea
+            style={{
+              minWidth: "500px",
+              maxWidth: "100%",
+              minHeight: "50px",
+              height: "100%",
+              width: "100%",
+            }}
+            placeholder="Add step"
+            value={step}
+            onChange={(e) => setStep(e.target.value)}
+          ></textarea>
+          <Button onClick={() => addProblemStep(step)}>Add step</Button>
+        </div>
+      )}
 
       {tsStep?.problem && (
         <div
@@ -176,6 +178,8 @@ function NewProblem({ productName, addTSStep, setNewProblem, data }: props) {
             flexDirection: "column",
             marginTop: "10px",
             marginBottom: "10px",
+            height: "50vh",
+            overflowY: "auto",
           }}
         >
           <h3>Problem - {tsStep.problem}</h3>
@@ -209,7 +213,18 @@ function NewProblem({ productName, addTSStep, setNewProblem, data }: props) {
                   resource={step.resource}
                   expanded={true}
                 ></ResourceItem>
-                <button
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "end",
+                  alignItems: "center",
+                  gap: "10px",
+                  paddingBottom: "5px",
+                }}
+              >
+                <Button
+                  outline
                   onClick={() =>
                     removeResourceFromStep(
                       token,
@@ -221,15 +236,14 @@ function NewProblem({ productName, addTSStep, setNewProblem, data }: props) {
                   }
                 >
                   Remove Image
-                </button>
-                <button onClick={() => setIsAddImageOpen(true)}>
+                </Button>
+                <Button outline onClick={() => setIsAddImageOpen(true)}>
                   Change/Add Image
-                </button>
+                </Button>
 
-                <Icon
-                  onClick={() => removeStep(step.step)}
-                  icon="material-symbols-light:delete-outline"
-                ></Icon>
+                <Button outline onClick={() => removeStep(step.step)}>
+                  Remove Step
+                </Button>
               </div>
               {isAddImageOpen && (
                 <ImageHandler

@@ -10,21 +10,25 @@ import { Icon } from "@iconify/react";
 import classes from "./Sidebar.module.scss";
 import { useAdminStore } from "../../store/zustand/store";
 import { getProductsOfResourceGroup } from "../../services/apiService";
+import LoadingSpinner from "../UI/loadingSpinner/LoadingSpinner";
 
 function Sidebar() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [loadingProducts, setLoadingProducts] = useState<boolean>(false);
   const { width } = useWindowSize();
   const location = useLocation();
   const sidebarCtx = useContext(SidebarContext);
   const loginCtx = useContext(LoginContext);
   const { t } = useTranslation();
-  const resourceGroups = useAdminStore((state) => state.resourceGroups);
 
   const setProducts = useAdminStore((state) => state.setProducts);
   const token = useAdminStore((state) => state.token);
   const setToken = useAdminStore((state) => state.setToken);
 
   function openSidebarHandler() {
+    setProducts([]);
+    if (token) getProducts(token);
+
     //for width>768(tablet size) if sidebar was open in width<768 was opened too.
     //just in case of tablet size and smaller then, sidebar__open can added.
     if (width <= 768) document.body.classList.toggle("sidebar__open");
@@ -35,7 +39,7 @@ function Sidebar() {
     loginCtx.toggleLogin();
   }
   async function getProducts(token: string) {
-    console.log("resource groups", resourceGroups);
+    setLoadingProducts(true);
     const data = await getProductsOfResourceGroup({ token });
     if (data?.status === 401) {
       setToken(null);
@@ -45,13 +49,14 @@ function Sidebar() {
       setProducts(data?.products || []);
       console.log("products set", data);
     }
+    setLoadingProducts(false);
   }
 
-  useEffect(() => {
-    if (token) {
-      getProducts(token);
-    }
-  }, [token]);
+  // useEffect(() => {
+  //   if (token) {
+  //     getProducts(token);
+  //   }
+  // }, [token]);
 
   useEffect(() => {
     const curPath = window.location.pathname.split("/")[1];
@@ -99,6 +104,7 @@ function Sidebar() {
         ) : (
           <h1>No Products to display</h1>
         )} */}
+        {loadingProducts && <LoadingSpinner></LoadingSpinner>}
       </div>
 
       <div className={[classes.sidebar__menu, classes.logout].join("")}>
