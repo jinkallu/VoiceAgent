@@ -93,8 +93,8 @@ function LoginBox() {
 
       <div className={classes.keyPic}>
         <img
-          src={require("../../assets/images/Revenue-cuate.svg").default}
-          alt="illustrator key"
+          src={require("../../assets/images/tralpinechat.png")}
+          alt="Tralpine chat"
         />
       </div>
     </div>
