@@ -140,29 +140,7 @@ function NewProblem({
           marginBottom: "5px",
         }}
       >
-        <textarea
-          style={{
-            minWidth: "500px",
-            maxWidth: "100%",
-            minHeight: "50px",
-            height: "100%",
-            width: "100%",
-          }}
-          placeholder="Problem"
-          name="problem"
-          onChange={(e) => setProblem(e.target.value)}
-          defaultValue={data?.problem}
-        ></textarea>
-        <Button onClick={() => addProblem(problem)}>Add Problem</Button>
-      </div>
-      {tsStep?.problem && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
+        <div style={{ width: "70%" }}>
           <textarea
             style={{
               minWidth: "500px",
@@ -171,11 +149,40 @@ function NewProblem({
               height: "100%",
               width: "100%",
             }}
-            placeholder="Add step"
-            value={step}
-            onChange={(e) => setStep(e.target.value)}
+            placeholder="Problem"
+            name="problem"
+            onChange={(e) => setProblem(e.target.value)}
+            defaultValue={data?.problem}
           ></textarea>
-          <Button onClick={() => addProblemStep(step)}>Add step</Button>
+        </div>
+        <Button onClick={() => addProblem(problem)}>Add Problem</Button>
+      </div>
+      {tsStep?.problem && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%",
+          }}
+        >
+          <div style={{ width: "70%" }}>
+            <textarea
+              style={{
+                minWidth: "500px",
+                maxWidth: "100%",
+                minHeight: "50px",
+                height: "100%",
+                width: "100%",
+              }}
+              placeholder="Add step"
+              value={step}
+              onChange={(e) => setStep(e.target.value)}
+            ></textarea>
+          </div>
+          <div>
+            <Button onClick={() => addProblemStep(step)}>Add step</Button>
+          </div>
         </div>
       )}
 

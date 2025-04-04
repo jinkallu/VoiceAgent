@@ -103,19 +103,26 @@ function ProductEdit() {
     loadDataFromProductName(token, productName);
   }, [location, token]);
   return (
-    <section style={{ maxHeight: "100%", overflowY: "auto" }}>
+    <section style={{ maxHeight: "80vh", overflowY: "auto" }}>
       <div
         style={{
           display: "flex",
-          justifyContent: "space-around",
-          alignItems: "center",
+          flexDirection: "column",
           width: "100%",
+          marginBottom: "10px",
+          gap: "10px",
         }}
       >
-        <h2 className="title">{`${
-          editable ? t("Edit Product-") : ""
-        }${productName}`}</h2>
+        <h3>{productName}</h3>
+        <div style={{ width: "70%" }}>
+          <h5>
+            You can find a list of problems and their trouble shooting steps
+            here.Click the expand icon to view the steps. To add a new problem
+            or edit an existing problem, click the edit button.
+          </h5>
+        </div>
       </div>
+
       {newProblem && (
         <Modal
           title={productName}

@@ -18,7 +18,14 @@ function ProblemItem({ tsStep, productName }: props) {
         width: "100%",
       }}
     >
-      <div style={{ display: "flex", gap: "5px", marginBottom: "5px" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "5px",
+          marginBottom: "10px",
+          marginTop: "10px",
+        }}
+      >
         <Icon
           style={{ cursor: "pointer" }}
           onClick={() => setExpanded((prev) => !prev)}

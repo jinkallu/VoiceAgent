@@ -30,10 +30,10 @@ function ProblemList({
           style={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
+            alignItems: "start",
             width: "100%",
-            boxShadow: "2px 2px gray",
-            borderLeft: "2px solid lightblue",
+            gap: "10px",
+            borderBottom: "2px solid lightblue",
           }}
         >
           <ProblemItem
