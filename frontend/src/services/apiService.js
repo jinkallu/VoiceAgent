@@ -1,7 +1,7 @@
+const API_BASE_URL = process.env.REACT_APP_API_URL;
 const authenticate = async (username, password) => {
   try {
-    console.log("login started");
-    const response = await fetch("http://127.0.0.1:8000/login/", {
+    const response = await fetch(`${API_BASE_URL}/login/`, {
       method: "POST",
       body: JSON.stringify({ username, password }),
       headers: {
@@ -20,7 +20,7 @@ const authenticate = async (username, password) => {
 
 const getResourceGroups = async (token) => {
   try {
-    const response = await fetch("http://127.0.0.1:8000/resourcegroups/", {
+    const response = await fetch(`${API_BASE_URL}/resourcegroups/`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -35,7 +35,7 @@ const getResourceGroups = async (token) => {
 
 const createResourceGroup = async (token, res_name) => {
   try {
-    const response = await fetch("http://127.0.0.1:8000/createresourcegroup/", {
+    const response = await fetch(`${API_BASE_URL}/createresourcegroup/`, {
       method: "POST",
       body: JSON.stringify({
         res_name,
@@ -57,7 +57,7 @@ const createResourceGroup = async (token, res_name) => {
 
 const getProductsOfResourceGroup = async ({ token }) => {
   try {
-    const response = await fetch("http://127.0.0.1:8000/products/", {
+    const response = await fetch(`${API_BASE_URL}/products/`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json", // Ensure you're sending JSON
@@ -76,7 +76,7 @@ const getProductsOfResourceGroup = async ({ token }) => {
 };
 const getResouceGroupFromUsername = async (token) => {
   try {
-    const response = await fetch("http://127.0.0.1:8000/loadresourcegroups/", {
+    const response = await fetch(`${API_BASE_URL}/loadresourcegroups/`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json", // Ensure you're sending JSON
@@ -96,7 +96,7 @@ const getResouceGroupFromUsername = async (token) => {
 
 const getDataFromProductName = async (token, product_name) => {
   try {
-    const response = await fetch("http://127.0.0.1:8000/product_data/", {
+    const response = await fetch(`${API_BASE_URL}/product_data/`, {
       method: "POST",
       body: JSON.stringify({ product_name }),
       headers: {
@@ -118,7 +118,7 @@ const getDataFromProductName = async (token, product_name) => {
 
 const getProductResource = async (token, product_name, resource) => {
   try {
-    const response = await fetch("http://127.0.0.1:8000/product_resource/", {
+    const response = await fetch(`${API_BASE_URL}/product_resource/`, {
       method: "POST",
       body: JSON.stringify({
         product_name,
@@ -144,7 +144,7 @@ const getProductResource = async (token, product_name, resource) => {
 };
 const uploadProductData = async (token, product_name, data) => {
   try {
-    const response = await fetch("http://127.0.0.1:8000/upload_productdata/", {
+    const response = await fetch(`${API_BASE_URL}/upload_productdata/`, {
       method: "POST",
       body: JSON.stringify({
         product_name,
@@ -168,7 +168,7 @@ const uploadProductData = async (token, product_name, data) => {
 
 const addProduct = async (token, product_name) => {
   try {
-    const response = await fetch("http://127.0.0.1:8000/add_product/", {
+    const response = await fetch(`${API_BASE_URL}/add_product/`, {
       method: "POST",
       body: JSON.stringify({
         product_name,
@@ -192,7 +192,7 @@ const addProduct = async (token, product_name) => {
 
 const uploadPDF = async (token, formData) => {
   try {
-    const response = await fetch("http://127.0.0.1:8000/upload_pdf/", {
+    const response = await fetch(`${API_BASE_URL}/upload_pdf/`, {
       method: "POST",
       body: formData,
 
@@ -215,7 +215,7 @@ const uploadPDF = async (token, formData) => {
 
 const uploadImage = async (token, formData) => {
   try {
-    const response = await fetch("http://127.0.0.1:8000/upload_image/", {
+    const response = await fetch(`${API_BASE_URL}/upload_image/`, {
       method: "POST",
       body: formData,
 
@@ -238,7 +238,7 @@ const uploadImage = async (token, formData) => {
 
 const removeResource = async (token, product_name, resource) => {
   try {
-    const response = await fetch("http://127.0.0.1:8000/remove_resource/", {
+    const response = await fetch(`${API_BASE_URL}/remove_resource/`, {
       method: "POST",
       body: JSON.stringify({
         product_name,
