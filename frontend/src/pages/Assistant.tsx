@@ -59,6 +59,11 @@ function Assistant() {
             >
               Open Assistant
             </a>
+            <iframe
+              src={resourceGroup[0]["app-url"]}
+              allow="microphone"
+              style={{ width: "100%", height: "500px", border: "none" }}
+            />
           </div>
         )}
         {resourceGroup.length === 0 && !isModalOpen && (
