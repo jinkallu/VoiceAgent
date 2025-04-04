@@ -69,13 +69,12 @@ function LoginBox() {
             ref={userNameRef}
             type={"text"}
             id={"userName"}
-            placeholder={"admin"}
-            value="test"
+            //placeholder={"admin"}
           />
           <span ref={errorMessageRef} className={classes.errorMessage}>
             {t("errorMessage")}
           </span>
-          <Input type={"password"} id={"pass"} value="test" ref={passwordRef} />
+          <Input type={"password"} id={"pass"}  ref={passwordRef} />
           <Button type="submit">{t("login")}</Button>
           {isLoading && <LoadingSpinner></LoadingSpinner>}
           <Link className={classes.forgat_pass} to="/">

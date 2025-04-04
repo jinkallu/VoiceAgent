@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import classes from "./Login.module.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { useAdminStore } from "../../store/zustand/store";
+import { registerUser } from "../../services/apiService";
 
 function RegisterBox() {
   const loginCtx = useContext(LoginContext);
@@ -65,28 +66,18 @@ function RegisterBox() {
         return
     }
 
+    const data = await registerUser(
+      userNameRef.current?.value,
+      passwordRef.current?.value,
+    )
     
-
-    const API_BASE_URL = process.env.REACT_APP_API_URL;
-
-
-    const response = await fetch(`${API_BASE_URL}/register/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username: userNameRef.current?.value,
-        password: passwordRef.current?.value,
-      }),
-    });
-
-    const data = await response.json();
     console.log(data);
-    if (response.ok && data?.access_token) {
-      console.log(data);
-      setToken(data.access_token);
-      setResourceGroup(data?.resourceGroups || []);
-      localStorage.setItem("token", data.access_token);
-      loginCtx.toggleLogin();
+    if (data) {
+      //console.log(data);
+      //setToken(data.access_token);
+      //setResourceGroup(data?.resourceGroups || []);
+      //localStorage.setItem("token", data.access_token);
+      //loginCtx.toggleLogin();
       navigate("/");
     } else {
       userNameRef?.current?.focus();
@@ -120,11 +111,11 @@ function RegisterBox() {
             {t("userNameErrorMessage")}
           </span>
           
-          <Input type={"password"} id={"pass"} value="test" ref={passwordRef} />
+          <Input type={"password"} id={"pass"} ref={passwordRef} />
           <span ref={errorMessageRef} className={classes.errorMessage}>
             {t("pwdErrorMessage")}
           </span>
-          <Input type={"password"} id={"veripass"} value="test" ref={verifyPasswordRef}/>
+          <Input type={"password"} id={"veripass"} ref={verifyPasswordRef}/>
           <Button type="submit">{t("register")}</Button>
         </form>       
         <Link className={classes.forgat_pass} to="/login">
