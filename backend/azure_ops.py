@@ -96,6 +96,7 @@ class AzureOps:
                 pass
             else:
                 principal_id = identity.principal_id
+                self.authManagement.authAccessToRG(principal_id, rg_name)
 
         container_app_env_names = self.get_resource_names_by_type(resources, "Microsoft.App/managedEnvironments")    
         # Create Container Apps Env
@@ -273,6 +274,22 @@ class AzureOps:
                                 "name": "LOG_CONTAINER", 
                                 "value": os.getenv("LOG_CONTAINER")
                             },
+                            {
+                                "name": "AZURE_ADMIN_RESOURCE_GROUP", 
+                                "value": os.getenv("AZURE_ADMIN_RESOURCE_GROUP")
+                            },
+                            {
+                                "name": "AZURE_ADMIN_CONTAINER_NAME", 
+                                "value": os.getenv("AZURE_ADMIN_CONTAINER_NAME")
+                            },
+                            {
+                                "name": "AZURE_ADMIN_BLOB_NAME", 
+                                "value": os.getenv("AZURE_ADMIN_BLOB_NAME")
+                            },
+                            {
+                                "name": "ALLOWED_CLOUD_ORIGIN", 
+                                "value": os.getenv("ALLOWED_CLOUD_ORIGIN")
+                            },
                      
                         ]
             app = self.containerAppManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, app_name, location, identity_name, os.getenv("ADMIN_ACR_NAME"), os.getenv("ADMIN_IMG_NAME"), os.getenv("ADMIN_IMG_TAG"), env_vars, 8000, False)
@@ -422,6 +439,7 @@ class AzureOps:
                 # TODO: Manage storage account creation error
                 pass
             else:
+                self.authManagement.authAccessToStorage(os.getenv("AZURE_ADMIN_ID_PRINCIPAL_ID"), rg_name, storage_account_name)
                 self.authManagement.authAccessToStorage(identity.principal_id, rg_name, storage_account_name)
                 blobOps = BlobOps()
                 blobOps.setBlobServiceClient(storage_account_name)
@@ -617,8 +635,8 @@ def test_create_container_env(azure_ops):
 
 if __name__ == "__main__":
     azure_ops = AzureOps()
-    #azure_ops.provision_resources("myassistant30", "test1")
-    azure_ops.provision_admin_resources("Admin")
+    azure_ops.provision_resources("myassistant32", "test")
+    #azure_ops.provision_admin_resources("Admin")
     # command = ["build/bin/whisper-server", "--host", "0.0.0.0", "-lpt", "-0.5"]
     # app = azure_ops.containerAppManagement.createContainerApp("c5ad8acd-d3b5-4357-beae-caeff17c2d82", "myassistant27", "myassistant27-env", "myassistant27-stt", "east us 2", "myassistant27-identity", os.getenv("PERMANENT_ACR_NAME"), "stt", "main", [], 8080, False, command)
 

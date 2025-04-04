@@ -44,6 +44,7 @@ class ResourceManagement:
 
     def get_blobstorage_from_resource_group(self, resource_group_name):
         resources = self.list_resources_in_group(resource_group_name)
+        print("resources", resources)
         resource_type = 'Microsoft.Storage/storageAccounts'
         blob_storage = self.filter_resources_by_type(resources, resource_type)
         return blob_storage

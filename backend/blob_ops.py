@@ -49,7 +49,7 @@ class BlobOps:
         
             return content
         except Exception as e:
-            print("Blob read error", blob_name)
+            print("Blob read error", blob_name, e)
     
     def getStorageMapping(self, mapping_blob_name):
         return self.getBlobData(mapping_blob_name)

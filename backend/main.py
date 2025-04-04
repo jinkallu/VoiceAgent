@@ -29,6 +29,8 @@ origins = [
     os.environ.get("ALLOWED_LOCAL_ORIGIN"),  # Allow local development (optional)
 ]
 
+print("origins", origins)
+
 azureOps = AzureOps()
 processPDF = ProcessPDF()
 
@@ -103,7 +105,8 @@ def create_access_token(data):
 def getUserData():
     try:
         blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(os.getenv("AZURE_ADMIN_RESOURCE_GROUP"))
-        print(blob_storage)
+        print("AZURE_ADMIN_RESOURCE_GROUP", os.getenv("AZURE_ADMIN_RESOURCE_GROUP"))
+        print("blob_storage", blob_storage)
         if(len(blob_storage)>0):
             storageName=blob_storage[0]["name"]
             azureOps.blobOps.setBlobServiceClient(storage_name=storageName)
@@ -113,6 +116,7 @@ def getUserData():
             return userData
     except Exception as e:
         print("error in accessing userdata", e)
+    return []
 
 @app.post("/api/register/")
 def register(user_data: UserRegister):
@@ -140,6 +144,7 @@ def register(user_data: UserRegister):
         res=azureOps.blobOps.createOrReplaceBlobFromPyDict(os.getenv("AZURE_ADMIN_BLOB_NAME"), userData)
         print(res)
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=400, detail=f"Could not register the user")
 
 
@@ -149,6 +154,8 @@ def register(user_data: UserRegister):
 @app.post("/api/login/")
 def login(user_data: UserLogin,):
     print('login called',user_data)
+    print("origins", origins)
+
     # user = db.query(User).filter(User.username == user_data.username).first()
     # if not user or not pwd_context.verify(user_data.password, user.hashed_password):
     #     raise HTTPException(status_code=401, detail="Invalid credentials")
