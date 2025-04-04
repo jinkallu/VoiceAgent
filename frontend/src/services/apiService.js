@@ -1,4 +1,26 @@
 const API_BASE_URL = process.env.REACT_APP_API_URL;
+
+const registerUser = async (username, password) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/register/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username,
+        password
+      }),
+    });
+
+    const data = await response.json();
+    return data
+
+  } catch (e) {
+    console.log(e);
+    return;
+  }
+
+}
+
 const authenticate = async (username, password) => {
   try {
     const response = await fetch(`${API_BASE_URL}/login/`, {
@@ -276,4 +298,5 @@ export {
   removeResource,
   uploadImage,
   authenticate,
+  registerUser
 };
