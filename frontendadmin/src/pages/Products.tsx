@@ -50,7 +50,12 @@ function Products() {
   return (
     <section>
       {createProduct && (
-        <Modal title="Create New Product" onConfirm={() => {}}>
+        <Modal
+          title="Create New Product"
+          onConfirm={() => {
+            setCreateProduct(false);
+          }}
+        >
           <CreateProduct></CreateProduct>
         </Modal>
       )}

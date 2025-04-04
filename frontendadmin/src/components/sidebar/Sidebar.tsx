@@ -68,6 +68,12 @@ function Sidebar() {
         <img src={images.logo} alt="Tralpine" />
       </div>
       <div className={classes.sidebar__menu}>
+        <Link className={classes.sidebar__menu__item} to={`assistant`}>
+          <div className={classes.sidebar__menu__item__icon}>
+            <Icon icon={""} />
+          </div>
+          <div className={classes.sidebar__menu__item__txt}>Assistant</div>
+        </Link>
         <Link
           to={`products`}
           className={classes.sidebar__menu__item}

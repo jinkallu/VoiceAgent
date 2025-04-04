@@ -10,14 +10,7 @@ function Dashboard() {
   return (
     <section>
       <h2 className="title">{t("dashboard")}</h2>
-      <Link
-          to={`assistant`}
-        >
-          <div>
-            <Icon icon={""} />
-          </div>
-          <div >Assistant</div>
-        </Link>
+
       <Summary />
       <SaleChart />
     </section>
