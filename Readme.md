@@ -150,6 +150,9 @@ OPENAI_4O_MINI_ENDPOINT=https://cog-s2kzrdow3y3rq.openai.azure.com/openai/deploy
 OPENAI_4O_MINI_KEY=
 OPENAI_4O_ENDPOINT=https://ai-jineshks5663ai187603290877.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview
 OPENAI_4O_KEY=
+EMAIL_SECRET_ID=
+EMAIL_SECRET_VALUE=
+EMAIL_CLIENT_ID=
 ```
 
 ### build in ACR frontend
