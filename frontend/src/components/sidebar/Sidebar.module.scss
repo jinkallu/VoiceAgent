@@ -38,8 +38,8 @@
 
     img {
       --size: 7.5rem;
-      width: var(--size);
-      height: var(--size);
+      width: 13rem;//var(--size);
+      height: 4rem;//var(--size);
     }
 
     @include tablet {
