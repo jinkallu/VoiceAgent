@@ -70,4 +70,4 @@ class SendEmail:
 
 if __name__ == "__main__":
     sendEmail = SendEmail()
-    sendEmail.sendTextMessage("jinesh.bond@gmail.com", subject="Test email", content="Test content")
+    sendEmail.sendTextMessage("jinesh.bond@gmail.com", email_from="jinesh.ks@tralpine.com", subject="Test email", content="Test content")

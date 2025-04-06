@@ -177,9 +177,45 @@ az acr login --name adminsu0cw
 docker push adminsu0cw.azurecr.io/admin:latest
 ```
 
+# 📧 Send Emails with Microsoft Graph API using Python
 
+This project demonstrates how to send emails from a **Microsoft 365 shared or user mailbox** using Python and the **Microsoft Graph API** via **Client Credentials Flow** — without user interaction.
 
+---
 
+## ✅ What Works
+
+- Created and registered an app **`PythonGraphEmail`** in Azure Portal under **App registrations**
+- Configured **API permissions**:
+  - `Mail.Send` (**Application**) — Required admin consent ✅
+- Granted **SendAs** permission to the app for the mailbox (user or shared)
+- Used **MSAL** to acquire access token
+- Successfully sent email via `https://graph.microsoft.com/v1.0/users/{sender}/sendMail`
+
+---
+
+## 📦 Requirements
+
+Install dependencies:
+
+```bash
+pip install msal requests python-dotenv
+```
+
+### 🔐 Environment Configuration
+Create a .env file in your project root with the following:
+
+```
+EMAIL_CLIENT_ID=your-app-client-id
+EMAIL_SECRET_VALUE=your-client-secret
+AZURE_TENANT_ID=your-tenant-id
+```
+### Ensure you have the Mail.Send (Application) permission granted via admin consent
+### If it did not work
+
+```
+Add-RecipientPermission -Identity "noreply@tralpine.com" -Trustee "PythonGraphEmail" -AccessRights SendAs
+```
 ---
 
 ## Notes
