@@ -15,6 +15,7 @@ function RegisterBox() {
   const loginCtx = useContext(LoginContext);
   const langCtx = useContext(langContextObj);
   const userNameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const verifyPasswordRef = useRef<HTMLInputElement>(null);
   const errorMessageRef = useRef<HTMLSpanElement>(null);
@@ -69,6 +70,7 @@ function RegisterBox() {
     const data = await registerUser(
       userNameRef.current?.value,
       passwordRef.current?.value,
+      emailRef.current?.value,
     )
     
     console.log(data);
@@ -110,7 +112,7 @@ function RegisterBox() {
           <span ref={userNameErrorMessage} className={classes.errorMessage}>
             {t("userNameErrorMessage")}
           </span>
-          
+          <Input type="email" id="email" placeholder="Work Email" ref={emailRef} />
           <Input type={"password"} id={"pass"} ref={passwordRef} />
           <span ref={errorMessageRef} className={classes.errorMessage}>
             {t("pwdErrorMessage")}

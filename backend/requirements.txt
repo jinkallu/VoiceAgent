@@ -22,3 +22,4 @@ azure-mgmt-cognitiveservices
 azure.mgmt.authorization
 azure.mgmt.containerinstance
 msal 
+freemail

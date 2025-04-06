@@ -17,6 +17,7 @@ import base64
 import json
 from PIL import Image
 import io
+import freemail
 
 import os
 from dotenv import load_dotenv
@@ -67,6 +68,7 @@ Base.metadata.create_all(bind=engine)
 class UserRegister(BaseModel):
     username: str
     password: str
+    email: str
 
 class UserLogin(BaseModel):
     username: str
@@ -123,9 +125,17 @@ def register(user_data: UserRegister):
     # Log the received data
     print(f"*Received user data: {user_data}")
 
+    if not user_data.email:
+        raise HTTPException(status_code=400, detail="Work Email Required")
+    
+    is_free = freemail.isFree(user_data.email)
+    if is_free:
+        raise HTTPException(status_code=400, detail="Work Email Required")
+
     # Check if the username already exists
     userData = getUserData()
-    print(userData)
+    #print(userData)
+    # TODO: check also for email
     user_exists = any(user["username"] == user_data.username for user in userData)
 
     if user_exists:
@@ -136,6 +146,7 @@ def register(user_data: UserRegister):
     user ={
         "username":user_data.username, 
         "hashed_password":hashed_password,
+        "email": user_data.email,
         "resourceGroups": []
         }
     userData.append(user)
