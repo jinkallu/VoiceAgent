@@ -9,6 +9,7 @@ from identity_management import IdentityManagement
 from cogni_services_mgmt import CognitiveServicesMgmt
 from auth_mgmt import AuthManagement
 from container_mgmt import ContainerMgmt
+from evtgrid_mgmt import EventGridMgmt
 import logging
 #logging.basicConfig(level=logging.DEBUG)
 
@@ -39,6 +40,7 @@ class AzureOps:
         self.cognitiveServicesMgmt = CognitiveServicesMgmt(credential, self.AZURE_SUBSCRIPTION_ID)
         self.authManagement = AuthManagement(credential, self.AZURE_SUBSCRIPTION_ID)
         self.containerMgmt = ContainerMgmt(credential, self.AZURE_SUBSCRIPTION_ID)
+        self.eventGridMgmt = EventGridMgmt(credential, self.AZURE_SUBSCRIPTION_ID)
 
     def generate_random_alphanumeric(self, length):
         characters = string.ascii_lowercase + string.digits  # a-z, 0-9
@@ -635,7 +637,9 @@ def test_create_container_env(azure_ops):
 
 if __name__ == "__main__":
     azure_ops = AzureOps()
-    azure_ops.provision_resources("myassistant32", "test")
+    azure_ops.resourceManagement.register_eventgrid_provider()
+    azure_ops.eventGridMgmt.createBlobStorageEvtSubscription("admin", "adminqcr6l", os.getenv("BASE_API_URL")+"/events/", "testevent")
+    #azure_ops.provision_resources("myassistant32", "test")
     #azure_ops.provision_admin_resources("Admin")
     # command = ["build/bin/whisper-server", "--host", "0.0.0.0", "-lpt", "-0.5"]
     # app = azure_ops.containerAppManagement.createContainerApp("c5ad8acd-d3b5-4357-beae-caeff17c2d82", "myassistant27", "myassistant27-env", "myassistant27-stt", "east us 2", "myassistant27-identity", os.getenv("PERMANENT_ACR_NAME"), "stt", "main", [], 8080, False, command)

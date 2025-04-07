@@ -67,6 +67,23 @@ class ResourceManagement:
             return resource_group
         except:
             return None
+        
+    def register_eventgrid_provider(self):
+        provider_namespace = "Microsoft.EventGrid"
+        
+        try:
+            # Register the Microsoft.EventGrid resource provider
+            poller = self.client.providers.register(provider_namespace)
+            
+            # Wait for the registration to complete
+            poller.wait()  # This will block until the registration is complete
+            
+            print(f"The {provider_namespace} provider is successfully registered.")
+            return True
+        except Exception as e:
+            print(f"Error registering the provider: {e}")
+            return False
+
 
 
          
