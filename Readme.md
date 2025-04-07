@@ -124,35 +124,36 @@ AZURE_ADMIN_BLOB_NAME=users.json
 PRODUCT_DATA_FILE_NAME=data.json
 PRODUCTS_BLOB_CONTAINER=pdf
 MAPPING_BLOB=mapping.json
-PERMANENT_RG_NAME=rg-testagent5
-PERMANENT_ACR_NAME=testagent5acrs2kzrdow3y3rq
-PERMANENT_IMG_NAME=aisearch-openai-rag-audio/backend-testagent5
-PERMANENT_IMG_TAG=azd-deploy-1743683465
-PERMANENT_IMG_LOCATION=eastus 2
+ASSISTANT_IMG_NAME=assistant
+ASSISTANT_IMG_TAG=latest
+ASSISTANT_IMG_LOCATION=eastus 2
 ADMIN_ACR_NAME=adminsu0cw
 ADMIN_IMG_NAME=admin
 ADMIN_IMG_TAG=latest
 ADMIN_FRONTEND_IMG_NAME=admin_frontend
 ADMIN_FRONTEND_IMG_TAG=latest
 ADMIN_IMG_LOCATION=eastus 2
-PERMANENT_TTS_IMG_NAME=tts
-PERMANENT_TTS_IMG_TAG=main
-PERMANENT_STT_IMG_NAME=stt
-PERMANENT_STT_IMG_TAG=main
+TTS_IMG_NAME=tts
+TTS_IMG_TAG=main
+STT_IMG_NAME=stt
+STT_IMG_TAG=main
 DEFAULT_PRODUCT_CONTAINER=sample-prd
 LOG_CONTAINER=applog
 ALLOWED_LOCAL_ORIGIN=http://localhost:3000
 ALLOWED_CLOUD_ORIGIN=https://admin-app-frontend.redwave-be3cee76.eastus2.azurecontainerapps.io
 BASE_API_URL=https://admin-app.redwave-be3cee76.eastus2.azurecontainerapps.io
 DEFAULT_PRODUCT_DATA_PATH=./sample_prd/data.json
+GODADDY_BASE_URL=https://api.godaddy.com
+GODADDY_KEY=
+GODADDY_SECRET=
+EMAIL_SECRET_ID=
+EMAIL_SECRET_VALUE=
+EMAIL_CLIENT_ID=
 ### for agent app
 OPENAI_4O_MINI_ENDPOINT=https://cog-s2kzrdow3y3rq.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-08-01-preview
 OPENAI_4O_MINI_KEY=
 OPENAI_4O_ENDPOINT=https://ai-jineshks5663ai187603290877.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview
 OPENAI_4O_KEY=
-EMAIL_SECRET_ID=
-EMAIL_SECRET_VALUE=
-EMAIL_CLIENT_ID=
 ```
 
 ### build in ACR frontend
