@@ -158,7 +158,17 @@ class ContainerAppManagement:
 
         print(f"✅ Managed Identity {identity_name} assigned to Container App {container_app_name}!")
 
+    def restartApp(self, rg_name, app_name):
+        # Restart the container app
+        try:
+            poller = self.containerapp_client.container_apps.begin_restart(rg_name, app_name)
+            poller.result()  # Wait for operation to complete
 
+            print(f"Restarted container app: {app_name}")
+            return True
+        except Exception as e:
+            print(e)
+            return False
 
     def updateContainerApp(self, rg_name, app_name, new_acr_name, new_image_name, new_image_tag, location, environment_name, identity_name, e_vars):
         # Step 2: Get the existing container app

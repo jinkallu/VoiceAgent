@@ -56,6 +56,22 @@ const getResourceGroups = async (token) => {
   }
 };
 
+const restartApp = async (token) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/restart_app/`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    // const data = await response.json();
+    // if (data?.resource_groups) return data.resource_groups;
+    return;
+  } catch (e) {
+    console.log(e);
+    return;
+  }
+};
+
 const createResourceGroup = async (token, res_name) => {
   try {
     const response = await fetch(`${API_BASE_URL}/createresourcegroup/`, {
@@ -299,5 +315,6 @@ export {
   removeResource,
   uploadImage,
   authenticate,
-  registerUser
+  registerUser,
+  restartApp
 };

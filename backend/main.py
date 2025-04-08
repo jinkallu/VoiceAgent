@@ -459,6 +459,18 @@ async def uploadImage(product_name: Annotated[str, Form()],file: UploadFile = Fi
         return False
 
 
+@app.post("/api/restart_app/")
+def restart_app(authorization: str = Header(...)):
+    try:
+        payload = authorised(authorization)
+        userData = payload.get("sub")
+        tokenData=json.loads(userData)
+        if len(tokenData["resourceGroups"]) > 0:
+            azureOps.restartApp(tokenData["resourceGroups"][0]["rg-name"])
+
+            return True
+    except Exception as e:
+        print(e)
 
 
 

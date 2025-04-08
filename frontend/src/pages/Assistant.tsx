@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAdminStore } from "../store/zustand/store";
-import { createResourceGroup } from "../services/apiService";
+import { createResourceGroup, restartApp } from "../services/apiService";
 import Button from "../components/UI/button/Button";
 
 function Assistant() {
@@ -18,6 +18,10 @@ function Assistant() {
       return;
     }
     const res = await createResourceGroup(token, res_name);
+  }
+
+  async function restart() {
+    const res = await restartApp(token);
   }
 
   return (
@@ -64,6 +68,9 @@ function Assistant() {
               allow="microphone"
               style={{ width: "100%", height: "500px", border: "none" }}
             />
+            <Button onClick={() => restart()}>
+              Restart App
+            </Button>
           </div>
         )}
         {resourceGroup.length === 0 && !isModalOpen && (

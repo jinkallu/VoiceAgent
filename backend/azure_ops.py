@@ -627,7 +627,12 @@ class AzureOps:
                 pass
 
         
-        
+    def restartApp(self, rg_name):
+        app_name = f"{rg_name}-app"
+        self.containerAppManagement.restartApp(rg_name, app_name)
+
+
+
 
 def test_create_container_env(azure_ops):
     azure_ops.containerAppManagement.createContainerEnv("test", "test-env", "eastus 2")
