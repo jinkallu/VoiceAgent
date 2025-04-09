@@ -5,6 +5,11 @@ import tiktoken
 from llm_utility import LLMUtility
 import json
 from io import BytesIO
+import zipfile
+import os
+import threading
+import time
+
 
 class ProcessPDF:
     def __init__(self):
@@ -14,8 +19,8 @@ class ProcessPDF:
         return s.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
 
 
-    def process(self, pdf_path=None, file_data=None):
-        text, images, image_names = self.extract_pdf(pdf_path, file_data, img_flag=True, max_img_size=5)
+    def process(self, pdf_path=None, file_data=None, img_flag=True):
+        text, images, image_names = self.extract_pdf(pdf_path, file_data, img_flag=img_flag, max_img_size=5)
         token_count = self.count_tokens(text)
         print("Token count:", token_count)
         ts_step_1 = self.lLMUtility.troubelshooting_step1(text)
@@ -63,9 +68,42 @@ class ProcessPDF:
         buffer.seek(0)
         return buffer
     
+    def delete_file_later(self, file_path: str, delay_seconds: int = 1800):
+        def delete_file():
+            try:
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                    print(f"[{time.ctime()}] Deleted file: {file_path}")
+            except Exception as e:
+                print(f"Error deleting file: {e}")
+
+        threading.Timer(delay_seconds, delete_file).start()
+    
+    def create_images_zip(self, image_buffers, username):
+         # Create a zip in memory
+        zip_buffer = BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            for filename, buffer in image_buffers.items():
+                buffer.seek(0)
+                zip_file.writestr(filename, buffer.read())
+
+        zip_buffer.seek(0)
+
+        # Save to disk inside container (e.g., /app folder)
+        zip_path = os.path.join("app", "zip", f"{username}.zip")  # or use "." for current dir
+        os.makedirs(os.path.dirname(zip_path), exist_ok=True)
+        with open(zip_path, "wb") as f:
+            f.write(zip_buffer.read())
+
+        self.delete_file_later(zip_path, delay_seconds=1800)  # 1800 seconds = 30 minutes
+        
+        return zip_path
+        
+        
+    
     def extract_pdf_data(self, doc, img_flag=False, max_img_size=5): # max_img_size mb
         text = ""
-        images = []
+        images = {}
         image_names = []
 
         for page_num in range(len(doc)):
@@ -89,7 +127,7 @@ class ProcessPDF:
                     buffer.seek(0)
 
                     img_name = f"image_page_{page_num+1}_{img_index}.{image_ext}"
-                    images.append({img_name: buffer})
+                    images[img_name] = buffer
                     image_names.append(img_name)
         
         return text, images, image_names

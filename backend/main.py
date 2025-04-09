@@ -375,13 +375,23 @@ async def uploadProductdata(request_data:ProductName, authorization: str = Heade
         print(e)
         return {"result":False}
         
+@app.post("/api/download_zip/")
+async def downloadZip(authorization: str = Header(...)):
+    payload = authorised(authorization)
+    userData = payload.get("sub")
+    tokenData=json.loads(userData)
+    username = tokenData["username"]
+    from fastapi.responses import FileResponse
 
+    file_path = f"app/zip/{username}.zip"
+    return FileResponse(file_path, media_type="application/zip", filename="images.zip")
 
 @app.post("/api/upload_pdf/")
-async def uploadPdf(file: UploadFile = File(...), authorization: str = Header(...)):
+async def uploadPdf(product_name: Annotated[str, Form()], file: UploadFile = File(...), authorization: str = Header(...)):
     try:
         payload = authorised(authorization)
-        print("upload pdf called...",payload)
+        userData = payload.get("sub")
+        tokenData=json.loads(userData)
         # Check if it's a PDF
         if file.content_type != "application/pdf":
             raise HTTPException(
@@ -390,13 +400,25 @@ async def uploadPdf(file: UploadFile = File(...), authorization: str = Header(..
             )
 
         pdf_bytes = await file.read()
-        problems_data, images = processPDF.process(file_data = pdf_bytes)
+        print("starting pdf processing")
+        problems_data, images = processPDF.process(file_data = pdf_bytes, img_flag=True)
+        print(images)
+        username = tokenData["username"]
+        zip_name = processPDF.create_images_zip(images, username)
+        # blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0]["rg-name"])
+        # if len(blob_storage) == 0:
+        #     return
+            
+        # azureOps.blobOps.setBlobServiceClient(storage_name=blob_storage[0]["name"])
+        # container_name=f"prd-{product_name}"   
+        # azureOps.blobOps.setContainerClient(container_name=container_name)  
+        # product_data = azureOps.blobOps.getProductData(os.getenv("PRODUCT_DATA_FILE_NAME"))   
         # azureOps.blobOps.setBlobServiceClient("tralpinestorage1")
         # azureOps.blobOps.setContainerClient(os.environ.get("PRODUCTS_BLOB_CONTAINER"))
 
         # azureOps.blobOps.createOrReplaceBlobFromPyDict("test_product.json", problems_data)
 
-        return {"data":problems_data,"status":200}
+        return {"data":problems_data, "zip_name": zip_name, "status":200}
     except Exception as e:
         print(e)
         return {"data":[],"status":400}

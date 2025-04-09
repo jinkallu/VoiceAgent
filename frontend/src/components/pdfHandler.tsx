@@ -5,21 +5,27 @@ import { useAdminStore } from "../store/zustand/store";
 import LoadingSpinner from "./UI/loadingSpinner/LoadingSpinner";
 import { ITSList } from "../interfaces/generic";
 interface props {
+  productName: string;
   pdfProblems: ITSList[] | [];
   setPdfProblems: (val: ITSList[] | []) => void;
   isAppendMode: boolean;
   setIsAppendMode: (val: boolean) => void;
   setProductData: (val: ITSList[]) => void;
   productData: ITSList[];
+  setUploadEnabled: (val: boolean) => void;
+  setZipEnabled: (val: boolean) => void;
 }
 
 function PDFHandler({
+  productName,
   pdfProblems,
   setPdfProblems,
   productData,
   isAppendMode,
   setIsAppendMode,
   setProductData,
+  setUploadEnabled,
+  setZipEnabled
 }: props) {
   const [selectedFile, setSelectedFile] = useState<File | null>();
   const token = useAdminStore((state) => state.token);
@@ -43,6 +49,7 @@ function PDFHandler({
     if (selectedFile) {
       formData.append("file", selectedFile);
       formData.append("fileb", selectedFile);
+      formData.append("product_name", productName);
       setIsLoading(true);
       const res = await uploadPDF(token, formData);
       setIsLoading(false);
@@ -57,6 +64,12 @@ function PDFHandler({
         const newData = res?.data?.data?.map((item: any) => {
           const newSteps =
             item?.steps?.map((stepItem: string) => ({ step: stepItem })) || [];
+          if (res?.data?.zip_name) {
+            console.log("setZipEnabled")
+            setZipEnabled(true);
+          }
+          setZipEnabled(true);
+
           return { problem: item.problem, steps: newSteps };
         });
         if (isAppendMode) {
@@ -64,6 +77,7 @@ function PDFHandler({
         } else {
           setProductData(newData);
         }
+        setUploadEnabled(false)
         // setPdfProblems(newData);
       }
     }

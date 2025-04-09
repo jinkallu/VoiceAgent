@@ -10,6 +10,7 @@ import { useAdminStore } from "../store/zustand/store";
 import {
   getDataFromProductName,
   uploadProductData,
+  downloadZip
 } from "../services/apiService";
 import ProblemList from "../components/problemList";
 import { ITSList } from "../interfaces/generic";
@@ -32,6 +33,7 @@ function ProductEdit() {
   const [pdfProblems, setPdfProblems] = useState<ITSList[] | []>([]);
   const [isAppendMode, setIsAppendMode] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [zipEnabled, setZipEnabled] = useState<boolean>(false);
 
   // const { data, error, status } = useFetch<IProductsTable>(
   //   `${url}/${productId}.json`
@@ -48,6 +50,12 @@ function ProductEdit() {
   // if (status === "fetched" && data) {
   //   productEdit = <EditProduct product={data} />;
   // }
+
+  async function downloadZipImg(token: string) {
+    setZipEnabled(false);
+    const data = await downloadZip(token);
+
+  }
 
   async function loadDataFromProductName(token: string, product_name: string) {
     setLoadingProductData(true);
@@ -156,6 +164,9 @@ function ProductEdit() {
             <Button onClick={() => setUploadEnabled(true)}>
               Import From PDF
             </Button>
+            {zipEnabled && (
+              <Button onClick={() => downloadZipImg(token)}>Download PDF Images</Button>
+            )}
           </div>
         )}
 
@@ -178,12 +189,15 @@ function ProductEdit() {
           }}
         >
           <PDFHandler
+            productName={productName}
             productData={productData}
             setProductData={setProductData}
             isAppendMode={isAppendMode}
             setIsAppendMode={setIsAppendMode}
             pdfProblems={pdfProblems}
             setPdfProblems={setPdfProblems}
+            setUploadEnabled={setUploadEnabled}
+            setZipEnabled={setZipEnabled}
           ></PDFHandler>
         </Modal>
       )}

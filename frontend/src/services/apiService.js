@@ -252,6 +252,36 @@ const uploadPDF = async (token, formData) => {
   }
 };
 
+const downloadZip = async (token) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/download_zip/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (response.status !== 200) {
+      return { status: response.status, message: "Unauthorized" };
+    } else {
+      const blob = await response.blob();
+
+      // Create a download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "images.zip"; // You can dynamically set the name here if needed
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url); // Clean up
+      return { status: 200 };
+    }
+  } catch (e) {
+    console.log(e);
+    return;
+  }
+};
+
 const uploadImage = async (token, formData) => {
   try {
     const response = await fetch(`${API_BASE_URL}/upload_image/`, {
@@ -316,5 +346,6 @@ export {
   uploadImage,
   authenticate,
   registerUser,
-  restartApp
+  restartApp,
+  downloadZip
 };
