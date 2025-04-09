@@ -19,6 +19,7 @@ function RegisterBox() {
   const passwordRef = useRef<HTMLInputElement>(null);
   const verifyPasswordRef = useRef<HTMLInputElement>(null);
   const errorMessageRef = useRef<HTMLSpanElement>(null);
+  const registerSuccessMessage = useRef<HTMLSpanElement>(null);
   const userNameErrorMessage = useRef<HTMLSpanElement>(null);
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -75,12 +76,18 @@ function RegisterBox() {
     
     console.log(data);
     if (data) {
-      //console.log(data);
-      //setToken(data.access_token);
-      //setResourceGroup(data?.resourceGroups || []);
-      //localStorage.setItem("token", data.access_token);
-      //loginCtx.toggleLogin();
-      navigate("/");
+      // console.log(data);
+      // setToken(data.access_token);
+      // setResourceGroup(data?.resourceGroups || []);
+      // localStorage.setItem("token", data.access_token);
+      // loginCtx.toggleLogin();
+      registerSuccessMessage.current?.setAttribute(
+        "style",
+        "display: inline-block;opacity: 1",
+      );
+      setTimeout(() => {
+        navigate("/");
+      }, 3000); // Wait 100ms before navigating
     } else {
       userNameRef?.current?.focus();
       userNameErrorMessage.current?.setAttribute(
@@ -109,6 +116,9 @@ function RegisterBox() {
             placeholder={"admin"}
             value="test"
           />
+          <span ref={registerSuccessMessage} className={classes.successMessage}>
+            {t("registerSuccessMessage")}
+          </span>
           <span ref={userNameErrorMessage} className={classes.errorMessage}>
             {t("userNameErrorMessage")}
           </span>

@@ -71,6 +71,7 @@ i18n
           registrationPage: "Register an Account",
           errorMessage: "User name or password is incorrect",
           userNameErrorMessage: "User name already exists",
+          registerSuccessMessage: "The username has been registered successfully.",
           pwdErrorMessage: "Password validation failed",
           forgetPass: "Forget your password?",
           rememberMe: "Remember me",

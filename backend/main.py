@@ -128,9 +128,9 @@ def register(user_data: UserRegister):
     if not user_data.email:
         raise HTTPException(status_code=400, detail="Work Email Required")
     
-    is_free = freemail.isFree(user_data.email)
-    if is_free:
-        raise HTTPException(status_code=400, detail="Work Email Required")
+    is_free = freemail.is_free(user_data.email)
+    # if is_free:
+    #     raise HTTPException(status_code=400, detail="Work Email Required")
 
     # Check if the username already exists
     userData = getUserData()
