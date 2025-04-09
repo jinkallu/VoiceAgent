@@ -45,7 +45,7 @@ function Assistant() {
       localStorage.setItem("token", data.access_token);
       //loginCtx.toggleLogin();
       setTimeout(() => {
-        navigate("/");
+        navigate("/assistant");
       }, 500); // Wait 100ms before navigating
     }
     setIsLoading(false);
@@ -101,7 +101,7 @@ function Assistant() {
               style={{ width: "100%", height: "500px", border: "none" }}
             />
             <Button onClick={() => restart()}>
-              Restart App
+              Restart Assistant
             </Button>
           </div>
         )}
