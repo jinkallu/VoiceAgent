@@ -42,6 +42,10 @@ class AzureOps:
         self.containerMgmt = ContainerMgmt(credential, self.AZURE_SUBSCRIPTION_ID)
         self.eventGridMgmt = EventGridMgmt(credential, self.AZURE_SUBSCRIPTION_ID)
 
+    def generate_random_lower_alpha(self, length):
+        characters = string.ascii_lowercase # a-z
+        return ''.join(random.choices(characters, k=length))
+
     def generate_random_alphanumeric(self, length):
         characters = string.ascii_lowercase + string.digits  # a-z, 0-9
         return ''.join(random.choices(characters, k=length))
@@ -51,8 +55,10 @@ class AzureOps:
 
     def provision_admin_resources(self, rg_name, location="eastus 2"):
         rg_name = rg_name.lower()
-        print(rg_name)
+        
         resource_group = self.resourceManagement.getResourceGroup(rg_name)
+            
+        
         if resource_group is None:
             resource_group = self.resourceManagement.createResourceGroup(rg_name, location)
             if resource_group is None:
@@ -308,11 +314,21 @@ class AzureOps:
                 pass
 
 
-    def provision_resources(self, rg_name, user_name, location="eastus 2"):
-        rg_name = rg_name.lower()
+    def provision_resources(self, assistant_name, user_name, location="eastus 2"):
+        resource_group = None
+        rg_name = ""
+        for i in range(100):
+            rg_name = self.generate_random_lower_alpha(6)
+            resource_group = self.resourceManagement.getResourceGroup(rg_name)
+            if resource_group:
+                continue
+            else:
+                break
+
+        if resource_group:
+            print("Could not generate resource group name, it already exists")
+            return
         # Create resource group
-        # TODO: check if the RG is already exists, if so generate new name
-        resource_group = self.resourceManagement.getResourceGroup(rg_name)
         if resource_group is None:
             resource_group = self.resourceManagement.createResourceGroup(rg_name, location)
             if resource_group is None:
@@ -330,7 +346,7 @@ class AzureOps:
 
                     user = next((u for u in userData if u["username"] == user_name), None)
                     if user:
-                        user["resourceGroups"].append({"rg-name": rg_name, "app-url":None})
+                        user["resourceGroups"].append({"assistant-name": assistant_name, "rg-name": rg_name, "app-url":None})
                         try:
                             res=self.blobOps.createOrReplaceBlobFromPyDict(os.getenv("AZURE_ADMIN_BLOB_NAME"), userData)
                             print(res)
