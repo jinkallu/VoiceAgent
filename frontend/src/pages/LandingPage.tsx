@@ -8,6 +8,15 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white text-gray-800">
       <header className="relative bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-20 px-4 text-center">
+        {/* Logo and Company Name */}
+      <div className="absolute top-4 left-4 flex items-center space-x-4">
+        <img
+          src={require("../assets/images/tralpinechat_small.png")} // Replace with the path to your logo
+          alt="Company Logo"
+          className="h-12 w-auto" // Adjust size as needed
+        />
+        <span className="text-2xl font-bold">Tralpine</span>
+      </div>
         {/* LOGIN BUTTON */}
         <div className="absolute top-4 right-4">
           <button onClick={() => navigate("/login")} className="px-4 py-2 bg-white text-indigo-600 font-semibold rounded-xl shadow hover:shadow-md transition">
