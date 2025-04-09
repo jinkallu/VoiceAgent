@@ -85,8 +85,8 @@ const createResourceGroup = async (token, res_name) => {
     });
 
     const data = await response.json();
-    if (data?.resource_groups) return data.resource_groups;
-    return;
+    
+    return data;
   } catch (e) {
     console.log(e);
     return;

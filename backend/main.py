@@ -229,7 +229,15 @@ def createresourcegroup( res: Assistant, authorization: str = Header(...)):
     username = sub_data['username']
     res_name = res.res_name
     print(res_name)
+
     azureOps.provision_resources(res_name, username)
+    userData_new = getUserData()
+    if(len(userData_new)>0):
+        for item in userData_new:
+            if item['username']==username:
+                user=item
+                access_token = create_access_token({"username":username,"resourceGroups":item["resourceGroups"] or []})
+                return {"access_token": access_token, "username":username, "resourceGroups":item["resourceGroups"] or []}
 
 
 @app.get("/api/products/")

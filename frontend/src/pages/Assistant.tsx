@@ -6,6 +6,7 @@ import LoadingSpinner from "../components/UI/loadingSpinner/LoadingSpinner";
 import classes from "../components/login/Login.module.scss";
 import { useTranslation } from "react-i18next";
 import langContextObj from "../store/langContext"
+import { useNavigate } from "react-router-dom";
 
 
 function Assistant() {
@@ -15,9 +16,13 @@ function Assistant() {
   const token = useAdminStore((state) => state.token);
   const [isLoading, setIsLoading] = useState(false);
   const errorMessageRef = useRef<HTMLSpanElement>(null);
-    const { t } = useTranslation();
-    const langCtx = useContext(langContextObj);
-  
+  const { t } = useTranslation();
+  const langCtx = useContext(langContextObj);
+  const setToken = useAdminStore((state) => state.setToken);
+  const setUserName = useAdminStore((state) => state.setUserName);
+  const setResourceGroup = useAdminStore((state) => state.setResourceGroup);
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     console.log(resourceGroup);
@@ -33,7 +38,16 @@ function Assistant() {
       return;
     }
     setIsLoading(true);
-    const res = await createResourceGroup(token, res_name);
+    const data = await createResourceGroup(token, res_name);
+    if (data?.access_token) {
+      setToken(data.access_token);
+      setResourceGroup(data?.resourceGroups || []);
+      localStorage.setItem("token", data.access_token);
+      //loginCtx.toggleLogin();
+      setTimeout(() => {
+        navigate("/");
+      }, 500); // Wait 100ms before navigating
+    }
     setIsLoading(false);
     setIsModalOpen(false);
   }
@@ -111,9 +125,9 @@ function Assistant() {
                 className="w-full p-2 border rounded"
               />
               <div >
-              <span ref={errorMessageRef} className={classes.errorMessage}>
-                {t("assistanterrorMessage")}
-              </span>
+                <span ref={errorMessageRef} className={classes.errorMessage}>
+                  {t("assistanterrorMessage")}
+                </span>
               </div>
               <div className="mt-4 flex justify-end">
                 <Button outline onClick={() => setIsModalOpen(false)}>
