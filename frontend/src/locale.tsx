@@ -70,6 +70,7 @@ i18n
           loginPage: "Login Into Your Account",
           registrationPage: "Register an Account",
           errorMessage: "User name or password is incorrect",
+          assistanterrorMessage: "Asisstant name must be lower case letters",
           userNameErrorMessage: "User name already exists",
           registerSuccessMessage: "The username has been registered successfully.",
           pwdErrorMessage: "Password validation failed",

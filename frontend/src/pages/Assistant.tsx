@@ -1,13 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import { useAdminStore } from "../store/zustand/store";
 import { createResourceGroup, restartApp } from "../services/apiService";
 import Button from "../components/UI/button/Button";
+import LoadingSpinner from "../components/UI/loadingSpinner/LoadingSpinner";
+import classes from "../components/login/Login.module.scss";
+import { useTranslation } from "react-i18next";
+import langContextObj from "../store/langContext"
+
 
 function Assistant() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [resourceName, setResourceName] = useState("");
   const resourceGroup = useAdminStore((state) => state.resourceGroup);
   const token = useAdminStore((state) => state.token);
+  const [isLoading, setIsLoading] = useState(false);
+  const errorMessageRef = useRef<HTMLSpanElement>(null);
+    const { t } = useTranslation();
+    const langCtx = useContext(langContextObj);
+  
 
   useEffect(() => {
     console.log(resourceGroup);
@@ -17,7 +27,15 @@ function Assistant() {
     if (!res_name) {
       return;
     }
+    const isOnlyLowercaseLetters = /^[a-z]+$/.test(res_name);
+    if (!isOnlyLowercaseLetters) {
+      console.error("Resource name must contain only lowercase letters (a–z).");
+      return;
+    }
+    setIsLoading(true);
     const res = await createResourceGroup(token, res_name);
+    setIsLoading(false);
+    setIsModalOpen(false);
   }
 
   async function restart() {
@@ -73,7 +91,7 @@ function Assistant() {
             </Button>
           </div>
         )}
-        {resourceGroup.length === 0 && !isModalOpen && (
+        {resourceGroup?.length === 0 && !isModalOpen && (
           <div>
             <Button onClick={() => setIsModalOpen(true)}>
               Create Assistant
@@ -87,11 +105,16 @@ function Assistant() {
               <h2 className="text-lg font-bold mb-4">Create Assistant</h2>
               <input
                 type="text"
-                placeholder="Enter resource name"
+                placeholder="Enter assistant name"
                 value={resourceName}
                 onChange={(e) => setResourceName(e.target.value)}
                 className="w-full p-2 border rounded"
               />
+              <div >
+              <span ref={errorMessageRef} className={classes.errorMessage}>
+                {t("assistanterrorMessage")}
+              </span>
+              </div>
               <div className="mt-4 flex justify-end">
                 <Button outline onClick={() => setIsModalOpen(false)}>
                   Cancel
@@ -99,12 +122,16 @@ function Assistant() {
                 <Button
                   onClick={() => {
                     createAssistant(resourceName);
-                    setIsModalOpen(false);
+                    //setIsModalOpen(false);
                   }}
                 >
                   Create
                 </Button>
               </div>
+              {isLoading && <LoadingSpinner></LoadingSpinner>}
+              {isLoading && (
+                <h4>Please wait .. Proessing can take a couple of minutes..!</h4>
+              )}
             </div>
           </div>
         )}

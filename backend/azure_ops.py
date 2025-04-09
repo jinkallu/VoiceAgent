@@ -23,7 +23,7 @@ load_dotenv()
 class AzureOps:
     def __init__(self):
 
-        self.permanent_rg_name = os.environ.get("ADMIN_RG_NAME")
+        self.permanent_rg_name = os.environ.get("AZURE_ADMIN_RESOURCE_GROUP")
         self.permanent_rg_acr_name = os.environ.get("ADMIN_ACR_NAME")
 
         self.AZURE_SUBSCRIPTION_ID = os.environ.get("AZURE_SUBSCRIPTION_ID")
@@ -251,6 +251,14 @@ class AzureOps:
                             {
                                 "name": "ADMIN_IMG_LOCATION", 
                                 "value": os.getenv("ADMIN_IMG_LOCATION")
+                            },
+                            {
+                                "name": "ASSISTANT_IMG_NAME", 
+                                "value": os.getenv("ASSISTANT_IMG_NAME")
+                            },
+                            {
+                                "name": "ASSISTANT_IMG_TAG", 
+                                "value": os.getenv("ASSISTANT_IMG_TAG")
                             },
                             {
                                 "name": "TTS_IMG_NAME", 
@@ -555,7 +563,7 @@ class AzureOps:
                                 "value": stt_app_url
                             },
                         ]
-            app = self.containerAppManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, app_name, location, identity_name, os.getenv("ADMIN_ACR_NAME"), os.getenv("ADMIN_IMG_NAME"), os.getenv("ADMIN_IMG_TAG"), env_vars, 8000, True)
+            app = self.containerAppManagement.createContainerApp(self.AZURE_SUBSCRIPTION_ID, rg_name, env_name, app_name, location, identity_name, os.getenv("ADMIN_ACR_NAME"), os.getenv("ASSISTANT_IMG_NAME"), os.getenv("ASSISTANT_IMG_TAG"), env_vars, 8000, True)
             if app is None:
                 # TODO: Manage container apps env creation error
                 pass
@@ -585,46 +593,46 @@ class AzureOps:
         
 
         # AI services
-        aiservice_names =  self.get_resource_names_by_type(resources, "Microsoft.CognitiveServices/accounts")
-        aiservice_name = f"{rg_name}OAI"
-        aiservice = None
-        if len(aiservice_names) > 0:
-            aiservice_name = aiservice_names[0]
-            print(f"aiservice {aiservice_name} already exists")
-            aiservice = self.cognitiveServicesMgmt.getAIService(rg_name, aiservice_name)
-            if aiservice is None:
-                print("Error in Accessing aiservice")
-            else:
-                print("Accessed aiservice")
-        else:
-            aiservice = self.cognitiveServicesMgmt.createServiceResource(rg_name, aiservice_name, location)
-            if aiservice is None:
-                # TODO: Manage identity creation error
-                pass
+        # aiservice_names =  self.get_resource_names_by_type(resources, "Microsoft.CognitiveServices/accounts")
+        # aiservice_name = f"{rg_name}OAI"
+        # aiservice = None
+        # if len(aiservice_names) > 0:
+        #     aiservice_name = aiservice_names[0]
+        #     print(f"aiservice {aiservice_name} already exists")
+        #     aiservice = self.cognitiveServicesMgmt.getAIService(rg_name, aiservice_name)
+        #     if aiservice is None:
+        #         print("Error in Accessing aiservice")
+        #     else:
+        #         print("Accessed aiservice")
+        # else:
+        #     aiservice = self.cognitiveServicesMgmt.createServiceResource(rg_name, aiservice_name, location)
+        #     if aiservice is None:
+        #         # TODO: Manage identity creation error
+        #         pass
 
         # AI Deployments
-        deployment_name = "gpt-4o"
-        deployment = self.cognitiveServicesMgmt.getDeployment(rg_name, aiservice_name, deployment_name)
-        if deployment is None:
-            model_name = "gpt-4o"
-            version = "2024-11-20"
-            capacity = 20
-            deployment = self.cognitiveServicesMgmt.createDeployment(rg_name, aiservice_name, location, deployment_name, model_name, version, capacity)
-            if deployment is None:
-                # TODO: Manage deployment creation error
-                pass
+        # deployment_name = "gpt-4o"
+        # deployment = self.cognitiveServicesMgmt.getDeployment(rg_name, aiservice_name, deployment_name)
+        # if deployment is None:
+        #     model_name = "gpt-4o"
+        #     version = "2024-11-20"
+        #     capacity = 20
+        #     deployment = self.cognitiveServicesMgmt.createDeployment(rg_name, aiservice_name, location, deployment_name, model_name, version, capacity)
+        #     if deployment is None:
+        #         # TODO: Manage deployment creation error
+        #         pass
 
-        # AI Deployments
-        deployment_name = "gpt-4o-mini"
-        deployment = self.cognitiveServicesMgmt.getDeployment(rg_name, aiservice_name, deployment_name)
-        if deployment is None:
-            model_name = "gpt-4o-mini"
-            version = "2024-07-18"
-            capacity = 20
-            deployment = self.cognitiveServicesMgmt.createDeployment(rg_name, aiservice_name, location, deployment_name, model_name, version, capacity)
-            if deployment is None:
-                # TODO: Manage deployment creation error
-                pass
+        # # AI Deployments
+        # deployment_name = "gpt-4o-mini"
+        # deployment = self.cognitiveServicesMgmt.getDeployment(rg_name, aiservice_name, deployment_name)
+        # if deployment is None:
+        #     model_name = "gpt-4o-mini"
+        #     version = "2024-07-18"
+        #     capacity = 20
+        #     deployment = self.cognitiveServicesMgmt.createDeployment(rg_name, aiservice_name, location, deployment_name, model_name, version, capacity)
+        #     if deployment is None:
+        #         # TODO: Manage deployment creation error
+        #         pass
 
         
     def restartApp(self, rg_name):

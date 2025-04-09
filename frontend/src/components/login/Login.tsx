@@ -45,7 +45,7 @@ function LoginBox() {
       loginCtx.toggleLogin();
       setTimeout(() => {
         navigate("/");
-      }, 200); // Wait 100ms before navigating
+      }, 500); // Wait 100ms before navigating
     } else {
       userNameRef?.current?.focus();
       errorMessageRef.current?.setAttribute(

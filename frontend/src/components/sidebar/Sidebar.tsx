@@ -24,6 +24,7 @@ function Sidebar() {
   const setProducts = useAdminStore((state) => state.setProducts);
   const token = useAdminStore((state) => state.token);
   const setToken = useAdminStore((state) => state.setToken);
+  const resourceGroup = useAdminStore((state) => state.resourceGroup);
 
   function openSidebarHandler() {
     setProducts([]);
@@ -74,16 +75,18 @@ function Sidebar() {
           </div>
           <div className={classes.sidebar__menu__item__txt}>Assistant</div>
         </Link>
-        <Link
-          to={`products`}
-          className={classes.sidebar__menu__item}
-          onClick={openSidebarHandler}
-        >
-          <div className={classes.sidebar__menu__item__icon}>
-            <Icon icon={""} />
-          </div>
-          <div className={classes.sidebar__menu__item__txt}>Products</div>
-        </Link>
+        {resourceGroup?.length > 0 &&
+          <Link
+            to={`products`}
+            className={classes.sidebar__menu__item}
+            onClick={openSidebarHandler}
+          >
+            <div className={classes.sidebar__menu__item__icon}>
+              <Icon icon={""} />
+            </div>
+            <div className={classes.sidebar__menu__item__txt}>Products</div>
+          </Link>
+        }
         {/* {products.length > 0 ? (
           products?.map((item: string, index: number) => (
             <Link
