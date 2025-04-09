@@ -400,9 +400,7 @@ async def uploadPdf(product_name: Annotated[str, Form()], file: UploadFile = Fil
             )
 
         pdf_bytes = await file.read()
-        print("starting pdf processing")
         problems_data, images = processPDF.process(file_data = pdf_bytes, img_flag=True)
-        print(images)
         username = tokenData["username"]
         zip_name = processPDF.create_images_zip(images, username)
         # blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0]["rg-name"])

@@ -11,6 +11,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAdminStore } from "../../store/zustand/store";
 import { authenticate } from "../../services/apiService";
 import LoadingSpinner from "../UI/loadingSpinner/LoadingSpinner";
+import { tokenToString } from "typescript";
 
 function LoginBox() {
   const loginCtx = useContext(LoginContext);
@@ -42,7 +43,9 @@ function LoginBox() {
       localStorage.setItem("token", data.access_token);
       setUserName(userNameRef?.current?.value);
       loginCtx.toggleLogin();
-      navigate("/");
+      setTimeout(() => {
+        navigate("/");
+      }, 200); // Wait 100ms before navigating
     } else {
       userNameRef?.current?.focus();
       errorMessageRef.current?.setAttribute(
