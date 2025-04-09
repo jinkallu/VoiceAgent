@@ -137,7 +137,7 @@ function RegisterBox() {
 
       <div className={classes.keyPic}>
         <img
-          src={require("../../assets/images/Revenue-cuate.svg").default}
+          src={require("../../assets/images/tralpinechat_small.png")}
           alt="illustrator key"
         />
       </div>

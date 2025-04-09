@@ -1,6 +1,6 @@
 import React from "react-dom";
 import ReactDOM from "react-dom";
-
+import './index.css'; // Or wherever your Tailwind CSS is defined
 import App from "./App";
 import { SidebarContextProvider } from "./store/sidebarContext";
 import { LangContextProvider } from "./store/langContext";

@@ -22,7 +22,7 @@ function MainLayout() {
 
   useEffect(() => {
     if (!token) {
-      navigate("/login");
+      navigate("/landing");
     }
   }, [token]);
 

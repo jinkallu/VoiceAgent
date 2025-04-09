@@ -95,7 +95,7 @@ function LoginBox() {
 
       <div className={classes.keyPic}>
         <img
-          src={require("../../assets/images/tralpinechat.png")}
+          src={require("../../assets/images/tralpinechat_small.png")}
           alt="Tralpine chat"
         />
       </div>

@@ -1,16 +1,26 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function LandingPage() {
+  const navigate = useNavigate();
+
+
   return (
     <div className="min-h-screen bg-white text-gray-800">
-      <header className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-20 px-4 text-center">
+      <header className="relative bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-20 px-4 text-center">
+        {/* LOGIN BUTTON */}
+        <div className="absolute top-4 right-4">
+          <button onClick={() => navigate("/login")} className="px-4 py-2 bg-white text-indigo-600 font-semibold rounded-xl shadow hover:shadow-md transition">
+            Login
+          </button>
+        </div>
         <h1 className="text-4xl md:text-6xl font-bold mb-4">
           AI-Powered Troubleshooting Assistant — Free for Early Adopters
         </h1>
         <p className="text-lg md:text-xl max-w-2xl mx-auto">
           Create a smart, step-by-step support experience for your customers — with zero code and no upfront cost.
         </p>
-        <button className="mt-8 px-6 py-3 bg-white text-indigo-600 font-semibold rounded-2xl shadow-md hover:shadow-xl transition">
+        <button onClick={() => navigate("/register")} className="mt-8 px-6 py-3 bg-white text-indigo-600 font-semibold rounded-2xl shadow-md hover:shadow-xl transition">
           Get My Free Assistant
         </button>
       </header>
@@ -71,7 +81,7 @@ export default function LandingPage() {
 
       <section className="bg-indigo-600 text-white text-center py-16 px-4">
         <h2 className="text-3xl font-bold mb-4">Join as an early adopter and launch your first assistant in minutes.</h2>
-        <button className="mt-4 px-8 py-4 bg-white text-indigo-600 font-semibold rounded-2xl shadow-lg hover:shadow-2xl transition">
+        <button onClick={() => navigate("/register")} className="mt-4 px-8 py-4 bg-white text-indigo-600 font-semibold rounded-2xl shadow-lg hover:shadow-2xl transition">
           Create My Free Assistant Now
         </button>
         <p className="mt-4 text-sm italic">*Spots are limited. This offer will not last forever.</p>

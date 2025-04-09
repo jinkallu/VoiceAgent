@@ -15,6 +15,7 @@ const BlankPage = React.lazy(() => import("./pages/BlankPage"));
 const Login = React.lazy(() => import("./pages/Login"));
 const Register = React.lazy(() => import("./pages/Register"));
 const Assistant = React.lazy(() => import("./pages/Assistant"));
+const LandingPage = React.lazy(() => import("./pages/LandingPage"));
 
 
 function App() {
@@ -28,7 +29,7 @@ function App() {
           <Route element={<AuthLayout />}>
             <Route
               path="/"
-              element={token ? <MainLayout /> : <Navigate to="/login" />}
+              element={token ? <MainLayout /> : <Navigate to="/landing" />}
             >
               <Route index element={<Dashboard />} />
               <Route path="/products" element={<Products />} />
@@ -40,6 +41,7 @@ function App() {
               <Route path="/assistant" element={<Assistant />} />
             </Route>
           </Route>
+          <Route path="/landing" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="*" element={<NotFound />} />

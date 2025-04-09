@@ -12,6 +12,7 @@ html {
     width: 700px;
     min-width: 600px;
     order: 2;
+    margin-left: 80px; /* Adjust the value as needed */
     @media screen and (max-width: 992px) {
       display: none;
     }
