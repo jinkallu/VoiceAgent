@@ -32,11 +32,11 @@ function Assistant() {
     if (!res_name) {
       return;
     }
-    const isOnlyLowercaseLetters = /^[a-z]+$/.test(res_name);
-    if (!isOnlyLowercaseLetters) {
-      console.error("Resource name must contain only lowercase letters (a–z).");
-      return;
-    }
+    // const isOnlyLowercaseLetters = /^[a-z]+$/.test(res_name);
+    // if (!isOnlyLowercaseLetters) {
+    //   console.error("Resource name must contain only lowercase letters (a–z).");
+    //   return;
+    // }
     setIsLoading(true);
     const data = await createResourceGroup(token, res_name);
     if (data?.access_token) {
@@ -124,11 +124,13 @@ function Assistant() {
                 onChange={(e) => setResourceName(e.target.value)}
                 className="w-full p-2 border rounded"
               />
-              <div >
+              {/*
+                <div >
                 <span ref={errorMessageRef} className={classes.errorMessage}>
                   {t("assistanterrorMessage")}
                 </span>
               </div>
+              */}
               <div className="mt-4 flex justify-end">
                 <Button outline onClick={() => setIsModalOpen(false)}>
                   Cancel
