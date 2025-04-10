@@ -29,6 +29,9 @@ class BlobOps:
         print("containers",containers)
         return containers
     
+    def getContainerClient(self, container_name):
+        return self.blob_service_client.get_container_client(container_name)
+    
 
     def setContainerClient(self, container_name):
         # Get a container client to interact with the container
@@ -105,6 +108,8 @@ class BlobOps:
         # Convert to string or bytes
         json_string = json.dumps(py_dict)
         return self.createOrReplaceBlobFromJson(blob_name, json_string)
+    
+
 
 
 

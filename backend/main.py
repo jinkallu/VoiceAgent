@@ -18,7 +18,8 @@ import json
 from PIL import Image
 import io
 import freemail
-
+from io import BytesIO
+from pathlib import Path
 import os
 from dotenv import load_dotenv
 
@@ -257,15 +258,21 @@ def products( authorization: str = Header(...)):
                 return
             
             azureOps.blobOps.setBlobServiceClient(storage_name=blob_storage[0]["name"])
+            container_name = os.getenv("PRODUCTS_CONTAINER")
+            azureOps.blobOps.setContainerClient(container_name=container_name)
 
-            containers=azureOps.blobOps.getContainersList()
+            products = azureOps.blobOps.getStorageMappingAsJson(os.getenv("PRODUCTS_DATA_FILE_NAME"))
+            prdContainers = [item["name"] for item in products]
+
+
+            # containers=azureOps.blobOps.getContainersList()
             
-            for container in containers:
-                nameArray=container["name"].split("-")
-                if(nameArray[0]=="prd"):
-                    prdContainers.append("-".join(nameArray[1:]))
+            # for container in containers:
+            #     nameArray=container["name"].split("-")
+            #     if(nameArray[0]=="prd"):
+            #         prdContainers.append("-".join(nameArray[1:]))
                     
-            print("containers",prdContainers)  
+            # print("containers",prdContainers)  
 
     except Exception as e:
         return {"products": [], "detail": "Error"}
@@ -284,7 +291,12 @@ def product_data(request_data: ProductDataRequest, authorization: str = Header(.
             return
         
         azureOps.blobOps.setBlobServiceClient(storage_name=blob_storage[0]["name"])
-        container_name=f"prd-{request_data.product_name}"
+        container_name = os.getenv("PRODUCTS_CONTAINER")
+        azureOps.blobOps.setContainerClient(container_name=container_name)
+        products = azureOps.blobOps.getStorageMappingAsJson(os.getenv("PRODUCTS_DATA_FILE_NAME"))
+        product_container = next((item["container"] for item in products if item["name"] == request_data.product_name), None)
+        
+        container_name=product_container
         azureOps.blobOps.setContainerClient(container_name=container_name)
 
 
@@ -309,7 +321,12 @@ def product_data(request_data: ProductResourceRequest, authorization: str = Head
             return
         
         azureOps.blobOps.setBlobServiceClient(storage_name=blob_storage[0]["name"])
-        container_name=f"prd-{request_data.product_name}"
+        container_name = os.getenv("PRODUCTS_CONTAINER")
+        azureOps.blobOps.setContainerClient(container_name=container_name)
+        products = azureOps.blobOps.getStorageMappingAsJson(os.getenv("PRODUCTS_DATA_FILE_NAME"))
+        product_container = next((item["container"] for item in products if item["name"] == request_data.product_name), None)
+
+        container_name=product_container
         azureOps.blobOps.setContainerClient(container_name=container_name)
         folder_prefix=""
         if(request_data.type=="image"):
@@ -320,6 +337,8 @@ def product_data(request_data: ProductResourceRequest, authorization: str = Head
 
         image_data = azureOps.blobOps.getProductData(f"{folder_prefix}/{request_data.file_name}")
         image=Image.open(io.BytesIO(image_data))
+        if image.format == 'PNG':
+            image = image.convert("RGB")
         #print(azureOps.blobOps.createContainerIfNotExists("test"))
         # create a thumbnail image
         # image.thumbnail((100, 100))
@@ -350,7 +369,12 @@ async def uploadProductdata(request_data:ProductData, authorization: str = Heade
             return
             
         azureOps.blobOps.setBlobServiceClient(storage_name=blob_storage[0]["name"])
-        container_name=f"prd-{request_data.product_name}"
+        container_name = os.getenv("PRODUCTS_CONTAINER")
+        azureOps.blobOps.setContainerClient(container_name=container_name)
+        products = azureOps.blobOps.getStorageMappingAsJson(os.getenv("PRODUCTS_DATA_FILE_NAME"))
+        product_container = next((item["container"] for item in products if item["name"] == request_data.product_name), None)
+
+        container_name=product_container
         azureOps.blobOps.setContainerClient(container_name=container_name)
         
 
@@ -376,9 +400,33 @@ async def uploadProductdata(request_data:ProductName, authorization: str = Heade
             return
             
         azureOps.blobOps.setBlobServiceClient(storage_name=blob_storage[0]["name"])
-        container_name=f"prd-{request_data.product_name}"
-        res=azureOps.blobOps.createContainerIfNotExists(container_name=container_name)
-        return {"result":res}
+        container_name = os.getenv("PRODUCTS_CONTAINER")
+        azureOps.blobOps.setContainerClient(container_name=container_name)
+        prdContainers = azureOps.blobOps.getStorageMappingAsJson(os.getenv("PRODUCTS_DATA_FILE_NAME"))
+        for product in prdContainers:
+            if product["name"] == request_data.product_name:
+                return {"result":False, "detail": "Product name already exists"}
+
+        
+        container_name = ""
+        container_client = None
+        random_name = azureOps.generate_random_lower_alpha(6)
+        for i in range(100):
+            container_name=f"prd-{random_name}"
+            container_client = azureOps.blobOps.getContainerClient(container_name)
+            if container_client.exists():
+                continue
+            else:
+                break
+        if not container_client.exists():
+            res=azureOps.blobOps.createContainerIfNotExists(container_name=container_name)
+            prdContainers.append({"name": request_data.product_name, "container": container_name})
+            container_name = os.getenv("PRODUCTS_CONTAINER")
+            azureOps.blobOps.setContainerClient(container_name=container_name)
+            azureOps.blobOps.createOrReplaceBlobFromPyDict(os.getenv("PRODUCTS_DATA_FILE_NAME"), prdContainers)
+            return {"result":res}
+        else:
+            return {"result":False}
     except Exception as e:
         print(e)
         return {"result":False}
@@ -468,15 +516,34 @@ async def uploadImage(product_name: Annotated[str, Form()],file: UploadFile = Fi
         userData = payload.get("sub")
         tokenData=json.loads(userData)
         imageData=await file.read()
+        # Open image using PIL
+        # image_ext = "jpeg"
+        # image = Image.open(io.BytesIO(imageData))
+        # if image.format == 'PNG':
+        #     image = image.convert("RGB")
+        #     image_ext = "jpeg"
+
+        # #image = self.compress_to_target_size(image, max_img_size) # compress image to 5mb
+        # buffer = BytesIO()
+        # image.save(buffer, format="JPEG", quality=100)
+        # buffer.seek(0)
+        # imageData = buffer.getvalue()
         
         blob_storage = azureOps.resourceManagement.get_blobstorage_from_resource_group(tokenData["resourceGroups"][0]["rg-name"])
         if len(blob_storage) == 0:
             return
         
         azureOps.blobOps.setBlobServiceClient(storage_name=blob_storage[0]["name"])
-        container_name=f"prd-{product_name}"
+        container_name = os.getenv("PRODUCTS_CONTAINER")
         azureOps.blobOps.setContainerClient(container_name=container_name)
-        
+        products = azureOps.blobOps.getStorageMappingAsJson(os.getenv("PRODUCTS_DATA_FILE_NAME"))
+        product_container = next((item["container"] for item in products if item["name"] == product_name), None)
+
+        container_name=product_container
+        azureOps.blobOps.setContainerClient(container_name=container_name)
+
+        #jpeg_filename = Path(file.filename).with_suffix('.jpeg').name
+
         img_url = f"images/{file.filename}"
         print(img_url)
         res = azureOps.blobOps.createOrUpdateBlob(img_url,imageData)
@@ -514,7 +581,12 @@ def remove_resource(request_data: ProductResourceRequest, authorization: str = H
             return
         
         azureOps.blobOps.setBlobServiceClient(storage_name=blob_storage[0]["name"])
-        container_name=f"prd-{request_data.product_name}"
+        container_name = os.getenv("PRODUCTS_CONTAINER")
+        azureOps.blobOps.setContainerClient(container_name=container_name)
+        products = azureOps.blobOps.getStorageMappingAsJson(os.getenv("PRODUCTS_DATA_FILE_NAME"))
+        product_container = next((item["container"] for item in products if item["name"] == request_data.product_name), None)
+
+        container_name=product_container
         azureOps.blobOps.setContainerClient(container_name=container_name)
         folder_prefix=""
         if(request_data.type=="image"):

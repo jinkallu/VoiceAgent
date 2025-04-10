@@ -105,7 +105,7 @@ function ProductEdit() {
 
   useEffect(() => {
     const locationArray = location?.pathname.split("/");
-    const productName = locationArray[locationArray.length - 1];
+    const productName = decodeURIComponent(locationArray[locationArray.length - 1]);
 
     sestProductName(productName);
     loadDataFromProductName(token, productName);

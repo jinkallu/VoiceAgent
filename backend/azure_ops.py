@@ -479,6 +479,15 @@ class AzureOps:
                     with open(file_path, "rb") as data:
                         print('File opened')
                         blobOps.createOrUpdateBlob(blob_name, data)
+                products_container = os.getenv("PRODUCTS_CONTAINER") # TODO: manage it in env
+                if blobOps.createContainerIfNotExists(products_container):
+                    blobOps.setContainerClient(products_container)
+                    blob_name = os.getenv("PRODUCTS_DATA_FILE_NAME")  # Name of the blob you're uploading
+                    file_path = os.getenv("PRODUCTS_DATA_PATH")  # Local path to your JSON file
+                    print(file_path)
+                    with open(file_path, "rb") as data:
+                        print('File opened')
+                        blobOps.createOrUpdateBlob(blob_name, data)
 
         # # container registry
         # registry_names = self.get_resource_names_by_type(resources, "Microsoft.ContainerRegistry/registries")

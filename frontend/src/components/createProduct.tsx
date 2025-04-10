@@ -10,10 +10,10 @@ function CreateProduct() {
 
   const navigate = useNavigate();
   const addNewProduct = async (name: string) => {
-    const prodName = name.toLowerCase();
-    const res = await addProduct(token, prodName);
+    //const prodName = name.toLowerCase();
+    const res = await addProduct(token, name);
     if (res?.status === 200 && res?.data?.result) {
-      navigate(`/products/${prodName}`);
+      navigate(`/products/${encodeURIComponent(name)}`);
     }
     console.log(res);
   };
