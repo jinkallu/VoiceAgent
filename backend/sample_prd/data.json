@@ -1,35 +1,104 @@
 [
     {
-        "problem": " How to connect the earth ground wire to the ActiPower 4.0 PDU..",
-        "steps": [
-            {
-                "step": "Ensure the PDU is completely powered off and unplugged.",
-                "resource": {
-                    "type": "image",
-                    "fileName": "image_page_50_0.jpeg"
-                }
-            },
-            {
-                "step": "Locate the earth ground wire connection point on the PDU.",
-                "resource": {
-                    "type": "image",
-                    "fileName": "image_page_50_0.jpeg"
-                }
-            },
-            {
-                "step": "Attach the earth ground wire securely to the designated connection point.",
-                "resource": {
-                    "type": "image",
-                    "fileName": "image_page_50_0.jpeg"
-                }
-            },
-            {
-                "step": "Verify the connection is tight and reliable before powering on the PDU.",
-                "resource": {
-                    "type": "image",
-                    "fileName": "image_page_50_0.jpeg"
-                }
-            }
-        ]
+      "problem": "How to register and create your AI troubleshooting assistant.",
+      "steps": [
+        {
+          "step": "Go to the homepage and click the 'Get my free assistant' button.",
+          "resource": {
+            "type": "image",
+            "fileName": "register_click_button.jpeg"
+          }
+        },
+        {
+          "step": "Enter your name, email, password, and confirm your password, then click 'Register'.",
+          "resource": {
+            "type": "image",
+            "fileName": "register_form_filled.jpeg"
+          }
+        },
+        {
+          "step": "After registering, log in with your email and password.",
+          "resource": {
+            "type": "image",
+            "fileName": "login_form.jpeg"
+          }
+        },
+        {
+          "step": "Click on the 'Assistant' button in the left sidebar.",
+          "resource": {
+            "type": "image",
+            "fileName": "sidebar_assistant_button.jpeg"
+          }
+        },
+        {
+          "step": "Provide a name for your assistant and click 'Create'.",
+          "resource": {
+            "type": "image",
+            "fileName": "assistant_create_form.jpeg"
+          }
+        },
+        {
+          "step": "Wait a few minutes while resources are being provisioned. Do not refresh or close the page.",
+          "resource": {
+            "type": "image",
+            "fileName": "assistant_loading_spinner.jpeg"
+          }
+        },
+        {
+          "step": "Once ready, the assistant interface will load. You can now chat with your assistant.",
+          "resource": {
+            "type": "image",
+            "fileName": "assistant_chat_ui.jpeg"
+          }
+        }
+      ]
+    },
+    {
+      "problem": "How to add a new product and import user manual from PDF.",
+      "steps": [
+        {
+          "step": "Click on the 'Products' button in the left sidebar.",
+          "resource": {
+            "type": "image",
+            "fileName": "sidebar_products_button.jpeg"
+          }
+        },
+        {
+          "step": "Click on the 'Create Product' button and fill in the required details.",
+          "resource": {
+            "type": "image",
+            "fileName": "create_product_form.jpeg"
+          }
+        },
+        {
+          "step": "Once created, click the 'Edit' button next to the product.",
+          "resource": {
+            "type": "image",
+            "fileName": "product_edit_button.jpeg"
+          }
+        },
+        {
+          "step": "Click 'Import from PDF' and upload your user manual file.",
+          "resource": {
+            "type": "image",
+            "fileName": "import_pdf_button.jpeg"
+          }
+        },
+        {
+          "step": "Wait a few minutes while the PDF is processed.",
+          "resource": {
+            "type": "image",
+            "fileName": "pdf_processing_spinner.jpeg"
+          }
+        },
+        {
+          "step": "After processing, click 'Edit' on any problem entry and click 'Save' after making changes.",
+          "resource": {
+            "type": "image",
+            "fileName": "problem_edit_save.jpeg"
+          }
+        }
+      ]
     }
-]
+  ]
+  

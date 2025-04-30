@@ -11,7 +11,7 @@ const AuthLayout = () => {
     <Outlet />
   ) : (
     <Navigate
-      to="/login"
+      to="/landing"
       replace
       state={{ from: location }} // <-- current location so login can redirect back is desired
     />
