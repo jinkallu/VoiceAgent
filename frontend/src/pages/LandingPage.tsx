@@ -24,7 +24,7 @@ export default function LandingPage() {
           </button>
         </div>
         <h1 className="text-4xl md:text-6xl font-bold mb-4">
-          AI-Powered Troubleshooting Assistant — Free for Early Adopters
+          AI-Powered Troubleshooting Assistant — 1 month free for Early Adopters
         </h1>
         <p className="text-lg md:text-xl max-w-2xl mx-auto">
           Create a smart, step-by-step support experience for your customers — with zero code and no upfront cost.
@@ -49,7 +49,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="bg-gray-100 py-16 px-4 text-center">
+      {/* <section className="bg-gray-100 py-16 px-4 text-center">
         <h2 className="text-3xl font-bold mb-4">Why Free for Early Adopters?</h2>
         <p className="max-w-2xl mx-auto text-lg mb-6">
           We’re building the future of AI support — and we need your help to shape it. Early adopters get permanent access to our <strong>text-only plan for free</strong>.
@@ -62,9 +62,9 @@ export default function LandingPage() {
           <li>✓ Clean step-by-step interface</li>
           <li>✓ Email support</li>
         </ul>
-      </section>
+      </section> */}
 
-      <section className="py-16 px-4 max-w-4xl mx-auto text-center">
+      {/* <section className="py-16 px-4 max-w-4xl mx-auto text-center">
         <h2 className="text-3xl font-bold mb-6">Upgrade When You're Ready</h2>
         <div className="overflow-auto">
           <table className="w-full text-left border-collapse">
@@ -86,7 +86,7 @@ export default function LandingPage() {
             </tbody>
           </table>
         </div>
-      </section>
+      </section> */}
 
       <section className="bg-indigo-600 text-white text-center py-16 px-4">
         <h2 className="text-3xl font-bold mb-4">Join as an early adopter and launch your first assistant in minutes.</h2>
