@@ -161,8 +161,12 @@ class ContainerAppManagement:
     def restartApp(self, rg_name, app_name):
         # Restart the container app
         try:
-            poller = self.containerapp_client.container_apps.begin_restart(rg_name, app_name)
+            poller = self.containerapp_client.container_apps.begin_stop(rg_name, app_name)
             poller.result()  # Wait for operation to complete
+
+            poller = self.containerapp_client.container_apps.begin_start(rg_name, app_name)
+            poller.result()  # Wait for operation to complete
+
 
             print(f"Restarted container app: {app_name}")
             return True
