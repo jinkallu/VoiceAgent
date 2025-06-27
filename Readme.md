@@ -1,4 +1,4 @@
-# Azure Container Apps: Frontend + Backend Setup
+# AI-powered Real-time voice troubleshooting agent with VAD, STT, TTS (React + FastAPI on Azure Container Apps)
 
 ## Overview
 This project deploys a **frontend (React)** and **backend (FastAPI)** using Docker containers to **Azure Container Apps**. It uses a user-assigned managed identity with subscription-level access and follows a secure, environment-driven configuration.
