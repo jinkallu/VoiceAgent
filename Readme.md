@@ -4,6 +4,39 @@
 This project deploys a **frontend (React)** and **backend (FastAPI)** using Docker containers to **Azure Container Apps**. It uses a user-assigned managed identity with subscription-level access and follows a secure, environment-driven configuration.
 
 ---
+## Voice Activation Detection (VAD) and Speech Services
+
+This project includes robust voice activation detection (VAD) and speech processing capabilities as core backend features. These enable the VoiceAgent to respond intelligently to spoken input.
+
+### Features
+
+- **Voice Activation Detection (VAD):**
+  - Automatically detects when a user starts and stops speaking.
+  - Reduces background noise interference and only processes relevant speech segments.
+  - Utilizes state-of-the-art algorithms for reliable detection in real-world environments.
+
+- **Speech-to-Text:**
+  - Integrates with Whisper.cpp for high-accuracy speech recognition.
+  - Converts user speech to text in real-time, enabling further natural language processing.
+  - Containerized as an Azure Container App for scalable and secure deployment.
+
+- **Text-to-Speech:**
+  - Converts AI-generated or dynamic responses into natural-sounding speech.
+  - Supports multiple voices and languages, configurable via environment variables.
+
+- **Cloud-Native AI Integration:**
+  - Leverages Azure Cognitive Services for advanced AI and speech processing.
+  - Designed for secure, scalable, and cost-effective operation using managed identities and containerized workloads.
+
+### Usage
+
+- The backend automatically handles voice activation and speech recognition when a user interacts with the assistant.
+- No manual intervention is needed to start or stop recording—VAD ensures seamless user experience.
+- Configuration (e.g., choice of speech models, endpoints) is managed via environment variables and Azure resource provisioning.
+
+---
+
+*See the backend source code (`backend/azure_ops.py`, `backend/cogni_services_mgmt.py`) for implementation details and customization options.*
 
 ## Architecture
 
